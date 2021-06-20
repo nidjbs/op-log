@@ -1,0 +1,63 @@
+package com.yqn.op.log.config;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.List;
+
+/**
+ * @author huayuanlin
+ * @date 2021/06/10 21:43
+ * @desc the class desc
+ */
+@ConfigurationProperties(prefix = "op.log")
+public class OpLogConfig {
+
+    /*** need log table names */
+    private List<String> logTables;
+    /*** manualTxTimeOut unit：s */
+    private Integer manualTxTimeOut;
+    /*** softDeleteColumn ex：del */
+    private String softDeleteColumn;
+    /*** softDeleteColumn delete status value  ex：1,-1,0,true,false */
+    private String softDeleteColumnDeleteValue;
+
+    public String getSoftDeleteColumnDeleteValue() {
+        return softDeleteColumnDeleteValue;
+    }
+
+    public void setSoftDeleteColumnDeleteValue(String softDeleteColumnDeleteValue) {
+        this.softDeleteColumnDeleteValue = softDeleteColumnDeleteValue;
+    }
+
+    public String getSoftDeleteColumn() {
+        return softDeleteColumn;
+    }
+
+    public void setSoftDeleteColumn(String softDeleteColumn) {
+        this.softDeleteColumn = softDeleteColumn;
+    }
+
+    public List<String> getLogTables() {
+        return logTables;
+    }
+
+    public void setLogTables(List<String> logTables) {
+        this.logTables = logTables;
+    }
+
+
+    public Integer getManualTxTimeOut() {
+        return manualTxTimeOut;
+    }
+
+    public void setManualTxTimeOut(Integer manualTxTimeOut) {
+        this.manualTxTimeOut = manualTxTimeOut;
+    }
+
+    @Override
+    public String toString() {
+        return "QqnOpLogConfig{" +
+                "logTables=" + logTables +
+                '}';
+    }
+}

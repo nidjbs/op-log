@@ -1,0 +1,4 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.yqn.op.log.config.MyBatisOpLogAutoConfiguration,\
+com.yqn.op.log.config.OpLogAutoConfiguration
