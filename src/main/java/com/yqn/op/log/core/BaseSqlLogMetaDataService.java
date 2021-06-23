@@ -47,6 +47,11 @@ public abstract class BaseSqlLogMetaDataService implements ISqlLogMetaDataServic
     }
 
 
+    /**
+     *  convert sql type to op log type
+     * @param sqlType sqlType
+     * @return op log type
+     */
     private OpLogType convertType(SqlType sqlType) {
         switch (sqlType) {
             case INSERT:

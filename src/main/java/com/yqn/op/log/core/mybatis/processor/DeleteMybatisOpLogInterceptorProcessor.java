@@ -23,8 +23,9 @@ public class DeleteMybatisOpLogInterceptorProcessor extends MybatisOpLogIntercep
 
     }
 
+
     @Override
-    protected Map<String, Object> getBeforeData(MybatisInvocationWrapper invocationWrapper) {
+    public List<Map<String, Object>> getBeforeDataList(MybatisInvocationWrapper invocationWrapper) {
         MybatisSqlMetaData sqlMetaDataByContext = getSqlMetaDataByContext();
         String formatToSelectSqlParam = formatToSelectSqlParam(sqlMetaDataByContext.getSql());
         Object[] args = invocationWrapper.getInvocation().getArgs();
@@ -34,7 +35,7 @@ public class DeleteMybatisOpLogInterceptorProcessor extends MybatisOpLogIntercep
                 sqlMetaDataByContext.getTableName(), formatToSelectSqlParam);
         BoundSql boundSql = invocationWrapper.getBoundSql();
         Configuration configuration = invocationWrapper.getMappedStatement().getConfiguration();
-        List<Object> params = getAllSqlParams(boundSql,configuration);
+        List<Object> params = getAllSqlParams(boundSql, configuration);
         return doSelect(connection, selectSql, params);
     }
 

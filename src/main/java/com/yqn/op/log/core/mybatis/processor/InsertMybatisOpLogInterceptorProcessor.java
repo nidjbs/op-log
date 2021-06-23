@@ -26,9 +26,8 @@ public class InsertMybatisOpLogInterceptorProcessor extends MybatisOpLogIntercep
 
     }
 
-
     @Override
-    protected Map<String, Object> getAfterData(MybatisInvocationWrapper invocationWrapper) {
+    public List<Map<String, Object>> getAfterDataList(MybatisInvocationWrapper invocationWrapper) {
         BoundSql boundSql = invocationWrapper.getBoundSql();
         Configuration configuration = invocationWrapper.getMappedStatement().getConfiguration();
         Object parameterObject = boundSql.getParameterObject();
@@ -59,7 +58,8 @@ public class InsertMybatisOpLogInterceptorProcessor extends MybatisOpLogIntercep
                 result.put(property, value);
             });
         }
-        return result;
+        // todo 做字段映射
+        return null;
     }
 
     public static InsertMybatisOpLogInterceptorProcessor getInstance() {

@@ -1,5 +1,7 @@
 package com.yqn.op.log.core;
 
+import com.yqn.op.log.enums.OpLogStatus;
+
 import java.util.List;
 
 /**
@@ -19,9 +21,10 @@ public interface ISqlLogMetaDataService {
     /**
      * insert
      *
-     * @param opLogMetaDataDO log do
+     * @param opLogMetaDataDO log Do
+     * @return update status
      */
-    void insert(OpLogMetaDataDO opLogMetaDataDO);
+    Long insert(OpLogMetaDataDO opLogMetaDataDO);
 
     /**
      * list not processor log
@@ -31,10 +34,22 @@ public interface ISqlLogMetaDataService {
     List<OpLogMetaDataDO> listNotProcessor();
 
     /**
-     * update log
+     * update opLogStatus
      *
-     * @param opLogMetaDataDO do log
+     * @param opLogId  log id
+     * @param opLogStatus  opLogStatus
+     * @return update status
      */
-    void update(OpLogMetaDataDO opLogMetaDataDO);
+    boolean updateStatus(Long opLogId, OpLogStatus opLogStatus);
+
+    /**
+     * update opLogStatus to processing
+     *
+     * @see OpLogStatus#PROCESSING
+     *
+     * @param opLogId  log id
+     * @return update status
+     */
+    boolean updateStatusToProcessing(Long opLogId);
 
 }

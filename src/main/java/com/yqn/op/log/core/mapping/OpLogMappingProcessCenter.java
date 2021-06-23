@@ -5,6 +5,7 @@ import com.yqn.op.log.core.ISqlLogMetaDataService;
 import com.yqn.op.log.core.OpLogMetaDataDO;
 import com.yqn.op.log.util.SpringBeanUtil;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
  * @date 2021/06/20 23:34
  * @desc the class desc
  */
-public class OpLogMappingProcessCenter implements ApplicationListener<ContextStartedEvent> {
+public class OpLogMappingProcessCenter implements ApplicationListener<ContextRefreshedEvent> {
 
     private static final IOpLogMapping OP_LOG_MAPPING;
 
@@ -47,7 +48,8 @@ public class OpLogMappingProcessCenter implements ApplicationListener<ContextSta
     }
 
     @Override
-    public void onApplicationEvent(ContextStartedEvent contextStartedEvent) {
+    public void onApplicationEvent(ContextRefreshedEvent contextStartedEvent) {
+        // 支持配置 todo
         TIMER_EXECUTOR.scheduleAtFixedRate(() -> {
             List<OpLogMetaDataDO> opLogMetaDataList = SpringBeanUtil
                     .getBeanByType(ISqlLogMetaDataService.class).listNotProcessor();

@@ -12,6 +12,15 @@ public class OpLogContext {
     private List<SqlMetaData> sqlMetaDataList;
     private int curSqlCount = 0;
     private BizTrace bizTrace;
+    private Long opLogId;
+
+    public Long getOpLogId() {
+        return opLogId;
+    }
+
+    public void setOpLogId(Long opLogId) {
+        this.opLogId = opLogId;
+    }
 
     public int getCurSqlCount() {
         return curSqlCount;

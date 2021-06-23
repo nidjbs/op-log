@@ -1,7 +1,10 @@
 package com.yqn.op.log.core.mapping;
 
+import com.yqn.op.log.core.OpLogContent;
 import com.yqn.op.log.core.OpLogMetaDataDO;
 import com.yqn.op.log.core.OpLogMetaDataWrapper;
+import com.yqn.op.log.util.JsonUtil;
+import com.yqn.op.log.util.ObjBuilder;
 
 /**
  * @author huayuanlin
@@ -17,9 +20,15 @@ public class DbLogOpLogMappingTask extends AbstractOpLogMappingTask<OpLogMetaDat
 
     @Override
     public OpLogMetaDataWrapper convert() {
-
-
-
-        return null;
+        OpLogMetaDataDO opLogMetaData = getT();
+        String metaData = opLogMetaData.getMetaData();
+        return ObjBuilder.create(OpLogMetaDataWrapper::new)
+                .of(OpLogMetaDataWrapper::setId, opLogMetaData.getId())
+                .of(OpLogMetaDataWrapper::setOpId, opLogMetaData.getOpId())
+                .of(OpLogMetaDataWrapper::setBizId, opLogMetaData.getBizId())
+                .of(OpLogMetaDataWrapper::setBizDesc, opLogMetaData.getBizDesc())
+                .of(OpLogMetaDataWrapper::setTraceId, opLogMetaData.getTraceId())
+                .of(OpLogMetaDataWrapper::setOpLogContents, JsonUtil.toArray(metaData, OpLogContent.class))
+                .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.yqn.op.log.common;
+package com.yqn.op.log.exception;
 
 /**
  * @author huayuanlin

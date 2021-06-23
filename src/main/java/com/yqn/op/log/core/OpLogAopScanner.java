@@ -58,6 +58,12 @@ public class OpLogAopScanner extends AbstractAutoProxyCreator {
     }
 
 
+    /**
+     * is exist annotation
+     *
+     * @param targetClass target obj
+     * @return boolean
+     */
     private boolean existAnnotation(Class<?> targetClass) {
         Method[] methods = targetClass.getMethods();
         for (Method method : methods) {
@@ -71,10 +77,10 @@ public class OpLogAopScanner extends AbstractAutoProxyCreator {
 
 
     /**
-     * 获得代理bean的advised 属性
+     * get aop bean Advisor manager(support)
      *
      * @param proxy proxy
-     * @return 代理bean的advised 属性
+     * @return bean Advisor
      * @throws Exception ex
      */
     public static AdvisedSupport getCurProxyAdvisedSupportField(Object proxy) throws Exception {

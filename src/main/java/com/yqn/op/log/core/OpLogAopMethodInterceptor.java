@@ -89,7 +89,8 @@ public class OpLogAopMethodInterceptor implements MethodInterceptor {
             BizTrace bizTrace = opLogContext.getBizTrace();
             bizTrace.setBizDesc(opLog.bizDesc());
             ISqlLogMetaDataService logMetaDataService = SpringBeanUtil.getBeanByType(ISqlLogMetaDataService.class);
-            logMetaDataService.insert(logMetaDataService.doConvert());
+            Long logId = logMetaDataService.insert(logMetaDataService.doConvert());
+            opLogContext.setOpLogId(logId);
             // async process mapping
             OpLogMappingProcessCenter.submitTask(new OpLogContextMappingTask(opLogContext));
         } finally {

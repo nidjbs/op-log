@@ -9,6 +9,8 @@ import java.util.List;
  */
 public class OpLogMetaDataWrapper {
 
+    private Long id;
+
     private String traceId;
 
     private String opId;
@@ -18,6 +20,14 @@ public class OpLogMetaDataWrapper {
     private String bizDesc;
 
     private List<OpLogContent> opLogContents;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getTraceId() {
         return traceId;

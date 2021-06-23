@@ -1,5 +1,6 @@
 package com.yqn.op.log.core;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,8 +11,8 @@ import java.util.Map;
 public class OpLogContent {
     private String tableName;
     private Integer type;
-    private Map<String,Object> before;
-    private Map<String,Object> after;
+    private List<Map<String,Object>> before;
+    private List<Map<String,Object>> after;
 
 
     public String getTableName() {
@@ -30,19 +31,19 @@ public class OpLogContent {
         this.type = type;
     }
 
-    public Map<String, Object> getBefore() {
+    public List<Map<String, Object>> getBefore() {
         return before;
     }
 
-    public void setBefore(Map<String, Object> before) {
+    public void setBefore(List<Map<String, Object>> before) {
         this.before = before;
     }
 
-    public Map<String, Object> getAfter() {
+    public List<Map<String, Object>> getAfter() {
         return after;
     }
 
-    public void setAfter(Map<String, Object> after) {
+    public void setAfter(List<Map<String, Object>> after) {
         this.after = after;
     }
 }

@@ -25,8 +25,9 @@ public class UpdateMybatisOpLogInterceptorProcessor extends MybatisOpLogIntercep
 
     }
 
+
     @Override
-    protected Map<String, Object> getBeforeData(MybatisInvocationWrapper invocationWrapper) {
+    public List<Map<String, Object>> getBeforeDataList(MybatisInvocationWrapper invocationWrapper) {
         // separate update column and condition
         MybatisSqlMetaData sqlMetaDataByContext = getSqlMetaDataByContext();
         String sql = sqlMetaDataByContext.getSql();
@@ -44,8 +45,8 @@ public class UpdateMybatisOpLogInterceptorProcessor extends MybatisOpLogIntercep
      * get sql prams
      *
      * @param selectSqlParam sql
-     * @param boundSql boundSql
-     * @param configuration configuration
+     * @param boundSql       boundSql
+     * @param configuration  configuration
      * @return sql prams
      */
     private List<Object> getSqlParams(String selectSqlParam, BoundSql boundSql, Configuration configuration) {
@@ -94,12 +95,6 @@ public class UpdateMybatisOpLogInterceptorProcessor extends MybatisOpLogIntercep
 
     private String removeStr(String src, String target) {
         return src.substring(src.indexOf(target) + 1);
-    }
-
-
-    @Override
-    protected Map<String, Object> getAfterData(MybatisInvocationWrapper invocationWrapper) {
-        return null;
     }
 
     /**

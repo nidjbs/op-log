@@ -1,6 +1,6 @@
 package com.yqn.op.log.core.mybatis;
 
-import com.yqn.op.log.common.FrameworkException;
+import com.yqn.op.log.exception.FrameworkException;
 import com.yqn.op.log.core.mybatis.processor.DeleteMybatisOpLogInterceptorProcessor;
 import com.yqn.op.log.core.mybatis.processor.InsertMybatisOpLogInterceptorProcessor;
 import com.yqn.op.log.core.mybatis.processor.SoftDeleteMybatisOpLogInterceptorProcessor;

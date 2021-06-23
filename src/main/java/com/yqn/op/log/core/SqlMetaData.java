@@ -2,6 +2,7 @@ package com.yqn.op.log.core;
 
 import com.yqn.op.log.enums.SqlType;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,9 +20,9 @@ public class SqlMetaData {
 
     private String sql;
 
-    private Map<String, Object> beforeData;
+    private List<Map<String, Object>> beforeData;
 
-    private Map<String, Object> afterData;
+    private List<Map<String, Object>> afterData;
 
     public String getSql() {
         return sql;
@@ -55,19 +56,19 @@ public class SqlMetaData {
         this.tableName = tableName;
     }
 
-    public Map<String, Object> getBeforeData() {
+    public List<Map<String, Object>> getBeforeData() {
         return beforeData;
     }
 
-    public void setBeforeData(Map<String, Object> beforeData) {
+    public void setBeforeData(List<Map<String, Object>> beforeData) {
         this.beforeData = beforeData;
     }
 
-    public Map<String, Object> getAfterData() {
+    public List<Map<String, Object>> getAfterData() {
         return afterData;
     }
 
-    public void setAfterData(Map<String, Object> afterData) {
+    public void setAfterData(List<Map<String, Object>> afterData) {
         this.afterData = afterData;
     }
 }

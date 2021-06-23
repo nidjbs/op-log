@@ -3,7 +3,7 @@ package com.yqn.op.log.common;
 /**
  * @author huayuanlin
  * @date 2021/06/18 10:02
- * @desc the class desc
+ * @desc the interface desc
  */
 public interface CallBackWithReturn<P, R, T> {
 

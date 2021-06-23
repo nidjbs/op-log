@@ -1,14 +1,13 @@
 package com.yqn.op.log.core.mybatis;
 
 import com.yqn.op.log.common.CallBackWithReturn;
-import com.yqn.op.log.common.FrameworkException;
+import com.yqn.op.log.exception.FrameworkException;
 import com.yqn.op.log.common.Tuple;
 import com.yqn.op.log.config.OpLogConfig;
 import com.yqn.op.log.core.OpLogContext;
 import com.yqn.op.log.core.OpLogContextProvider;
 import com.yqn.op.log.core.OpLogInterceptorProcessor;
 import com.yqn.op.log.core.SqlMetaData;
-import com.yqn.op.log.core.mybatis.processor.UpdateMybatisOpLogInterceptorProcessor;
 import com.yqn.op.log.enums.SqlType;
 import com.yqn.op.log.util.*;
 import org.apache.ibatis.executor.statement.StatementHandler;
@@ -21,10 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,7 +29,8 @@ import java.util.stream.Collectors;
  * @date 2021/06/14 20:57
  * @desc the mybatis op log interceptor processor
  */
-public class MybatisOpLogInterceptorProcessor implements OpLogInterceptorProcessor<Invocation>, CallBackWithReturn<Invocation, Object, SqlMetaData> {
+public class MybatisOpLogInterceptorProcessor implements OpLogInterceptorProcessor<Invocation>,
+        CallBackWithReturn<Invocation, Object, SqlMetaData> {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(MybatisOpLogInterceptorProcessor.class);
 
@@ -68,26 +65,11 @@ public class MybatisOpLogInterceptorProcessor implements OpLogInterceptorProcess
      */
     private static String getTableName(String sql, String key) {
         String toUpperCase = sql.toUpperCase();
-        String format = toUpperCase.replaceAll("[\\s\\t\\n\\r]", " ").replaceAll("\\s+", " ");
+        String format = toUpperCase.replaceAll("[\\s\\t\\n\\r]", " ")
+                .replaceAll("\\s+", " ");
         format = format.substring(toUpperCase.indexOf(key) + key.length());
-        return format.substring(0, format.indexOf(" ")).replaceAll("`", "").replace("(", "").replace(")", "");
-    }
-
-    public static void main(String[] args) {
-        String sql = "insert into sy_order()\n" +
-                "         SET desception = ?,\n" +
-                "            \n" +
-                "            \n" +
-                "                order_no = ?\n" +
-                "            \n" +
-                "            \n" +
-                "                order_date = ?\n" +
-                "            \n" +
-                "            \n" +
-                "                state = ? \n" +
-                "        where id = ?";
-        String apply = PARSE_TABLE_NAME_FUN.get(SqlType.INSERT).apply(sql);
-        System.out.println(apply);
+        return format.substring(0, format.indexOf(" ")).replaceAll("`", "")
+                .replace("(", "").replace(")", "");
     }
 
     @Override
@@ -136,10 +118,10 @@ public class MybatisOpLogInterceptorProcessor implements OpLogInterceptorProcess
         invocationWrapper.setInvocation(invocation);
         invocationWrapper.setMappedStatement(mappedStatement);
         // before data
-        Map<String, Object> beforeData = mybatisOpLogInterceptorProcessor.getBeforeData(invocationWrapper);
+        List<Map<String, Object>> beforeData = mybatisOpLogInterceptorProcessor.getBeforeDataList(invocationWrapper);
         Tuple<SqlMetaData, Object> process = process(invocation);
         // after data
-        Map<String, Object> afterData = mybatisOpLogInterceptorProcessor.getAfterData(invocationWrapper);
+        List<Map<String, Object>> afterData = mybatisOpLogInterceptorProcessor.getAfterDataList(invocationWrapper);
         sqlMetaData.setBeforeData(beforeData);
         sqlMetaData.setAfterData(afterData);
         process.setT(sqlMetaData);
@@ -210,29 +192,29 @@ public class MybatisOpLogInterceptorProcessor implements OpLogInterceptorProcess
      * @param params     param values list
      * @return do select result
      */
-    protected Map<String, Object> doSelect(Connection connection, String sql, List<Object> params) {
+    protected List<Map<String, Object>> doSelect(Connection connection, String sql, List<Object> params) {
+        LOGGER.debug(String.format("do select before or after data,sql: %s,params:%s", sql, Arrays.toString(params.toArray())));
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             for (int i = 0; i < params.size(); i++) {
                 statement.setObject(i + 1, params.get(i));
             }
+            List<Map<String, Object>> result = new ArrayList<>();
             try (ResultSet resultSet = statement.executeQuery()) {
                 ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
                 int columnCount = resultSetMetaData.getColumnCount();
-                Map<String, Object> map = new LinkedHashMap<>(columnCount);
-                if (resultSet.next()) {
-                    for (int i = 1; i <= columnCount; i++) {
-                        // columnName
-                        String columnName = resultSetMetaData.getColumnName(i);
-                        int columnType = resultSetMetaData.getColumnType(i);
-                        // column value
-                        Object value = getColumnValue(resultSet, i, columnType);
-                        map.put(columnName, value);
+                while (resultSet.next()) {
+                    Map<String, Object> data = new LinkedHashMap<>(16);
+                    for (int i = 1; i < columnCount; i++) {
+                        Object columnValue = getColumnValue(resultSet, resultSetMetaData, i,
+                                resultSetMetaData.getColumnType(i));
+                        data.put(resultSetMetaData.getColumnLabel(i), columnValue);
                     }
+                    result.add(data);
                 }
-                return map;
+                return result;
             }
         } catch (Exception e) {
-            throw new FrameworkException("get delete before log error", e);
+            throw new FrameworkException("do before or after log error", e);
         }
     }
 
@@ -245,11 +227,12 @@ public class MybatisOpLogInterceptorProcessor implements OpLogInterceptorProcess
      * @return column value
      * @throws SQLException exception
      */
-    protected Object getColumnValue(ResultSet resultSet, int i, int columnType) throws SQLException {
+    private Object getColumnValue(ResultSet resultSet, ResultSetMetaData rs, int i, int columnType)
+            throws SQLException {
         Object value;
         // process time type
         if (Types.DATE == columnType) {
-            java.sql.Date date = resultSet.getDate(i);
+            java.sql.Date date = resultSet.getDate(rs.getColumnLabel(i));
             value = date == null ? null : new java.util.Date(date.getTime());
         } else if (Types.TIME == columnType || Types.TIME_WITH_TIMEZONE == columnType) {
             Time time = resultSet.getTime(i);
@@ -263,14 +246,15 @@ public class MybatisOpLogInterceptorProcessor implements OpLogInterceptorProcess
         return value;
     }
 
+
     /**
      * get before data
      *
      * @param invocationWrapper wrapper params
      * @return before data
      */
-    protected Map<String, Object> getBeforeData(MybatisInvocationWrapper invocationWrapper) {
-        return MapsUtil.hashMap();
+    public List<Map<String, Object>> getBeforeDataList(MybatisInvocationWrapper invocationWrapper) {
+        return CollectionsUtil.arrayList();
     }
 
     /**
@@ -279,8 +263,8 @@ public class MybatisOpLogInterceptorProcessor implements OpLogInterceptorProcess
      * @param invocationWrapper wrapper params
      * @return after data
      */
-    protected Map<String, Object> getAfterData(MybatisInvocationWrapper invocationWrapper) {
-        return MapsUtil.hashMap();
+    protected List<Map<String, Object>> getAfterDataList(MybatisInvocationWrapper invocationWrapper) {
+        return CollectionsUtil.arrayList();
     }
 
 

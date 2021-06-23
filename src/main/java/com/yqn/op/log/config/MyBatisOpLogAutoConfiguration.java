@@ -2,7 +2,7 @@ package com.yqn.op.log.config;
 
 import com.yqn.op.log.core.ISqlLogMetaDataService;
 import com.yqn.op.log.core.mybatis.MybatisOpLogInterceptor;
-import com.yqn.op.log.core.mybatis.MybatisSqlLogMetaDataServiceImpl;
+import com.yqn.op.log.core.JdbcTemplateSqlLogMetaDataServiceImpl;
 import org.apache.ibatis.plugin.Interceptor;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -26,7 +26,7 @@ public class MyBatisOpLogAutoConfiguration {
 
     @Bean
     public ISqlLogMetaDataService iSqlLogMetaDataService(){
-        return new MybatisSqlLogMetaDataServiceImpl();
+        return new JdbcTemplateSqlLogMetaDataServiceImpl();
     }
 
 }
