@@ -78,23 +78,23 @@ public class UpdateMybatisOpLogInterceptorProcessor extends MybatisOpLogIntercep
      * @return select sql
      */
     private String getSelectSql(String updateSql, String tableName) {
-        // get param sql : id = ?
-        String selectSqlParam = formatToSelectSqlParam(updateSql);
-        updateSql = updateSql.replaceAll(" ", "");
+        // get param sql : where id = ?
+        String selectSqlParam = formatToSelectSqlParam(updateSql.toUpperCase());
         // Remove update
-        String var1 = removeStr(updateSql, OpLogConstant.UPDATE);
+        String var1 = removeStr(updateSql.toUpperCase(), OpLogConstant.UPDATE);
         // remove table name
         String var2 = removeStr(var1, tableName);
         // remove set
         String var3 = removeStr(var2, OpLogConstant.SET);
         // => a = ? ,
         String var4 = var3.substring(0, var3.lastIndexOf(OpLogConstant.WHERE));
-        String var5 = var4.replaceAll("=?", " ");
+        String var5 = var4.replaceAll(" ","")
+                .replaceAll("\\n","").replaceAll("=?", " ");
         return String.format(OpLogConstant.SELECT_SQL_FORMAT, var5, tableName, selectSqlParam);
     }
 
     private String removeStr(String src, String target) {
-        return src.substring(src.indexOf(target) + 1);
+        return src.substring(src.indexOf(target) + target.length());
     }
 
     /**
@@ -106,7 +106,7 @@ public class UpdateMybatisOpLogInterceptorProcessor extends MybatisOpLogIntercep
      */
     private String formatToSelectSqlParam(String updateSql) {
         String toUpperCase = updateSql.toUpperCase();
-        return toUpperCase.substring(toUpperCase.lastIndexOf("WHERE") + 1);
+        return toUpperCase.substring(toUpperCase.lastIndexOf(OpLogConstant.WHERE) + OpLogConstant.WHERE.length());
     }
 
 

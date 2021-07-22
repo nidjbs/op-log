@@ -11,16 +11,17 @@ import com.yqn.op.log.util.SpringBeanUtil;
  */
 public class StandardOpLogMapping implements IOpLogMapping {
 
-
     @Override
     public void process(OpLogMetaDataWrapper opLogMetaDataWrapper) {
-        ISqlLogMetaDataService service = SpringBeanUtil.getBeanByType(ISqlLogMetaDataService.class);
-        boolean isNeedProcess = service.updateStatusToProcessing(opLogMetaDataWrapper.getId());
+        ISqlLogMetaDataService iSqlLogMetaDataService = SpringBeanUtil.getBeanByType(ISqlLogMetaDataService.class);
+        boolean isNeedProcess = iSqlLogMetaDataService.updateStatusToProcessing(opLogMetaDataWrapper.getId());
         if (!isNeedProcess) {
             return;
         }
         // todo process
-        
+
+        // process complete,insert mapping log
+
     }
 
     public static StandardOpLogMapping getInstance() {

@@ -18,7 +18,7 @@ public class ObjBuilder<T> {
     private List<Consumer<T>> consumers;
 
     private ObjBuilder() {
-        throw new UnsupportedOperationException();
+
     }
 
     /**

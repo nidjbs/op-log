@@ -3,7 +3,6 @@ package com.yqn.op.log.core.mapping;
 import com.yqn.op.log.common.OpLogConstant;
 import com.yqn.op.log.core.*;
 import com.yqn.op.log.util.ObjBuilder;
-
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -15,12 +14,11 @@ import java.util.stream.Collectors;
  */
 public class OpLogContextMappingTask extends AbstractOpLogMappingTask<OpLogContext> {
 
-
     /*** convert fun */
     private static final Function<SqlMetaData, OpLogContent> CONVERT_FUN = sqlMetaData -> {
         OpLogContent opLogContent = new OpLogContent();
         opLogContent.setTableName(sqlMetaData.getTableName());
-        opLogContent.setType(OpLogConstant.CONVERT_FUN.apply(sqlMetaData.getSqlType()).getId());
+        opLogContent.setType(OpLogConstant.SQL_TYPE_CONVERT_FUN.apply(sqlMetaData.getSqlType()).getId());
         opLogContent.setAfter(sqlMetaData.getAfterData());
         opLogContent.setBefore(sqlMetaData.getBeforeData());
         return opLogContent;

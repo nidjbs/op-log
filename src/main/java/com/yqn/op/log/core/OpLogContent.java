@@ -9,9 +9,13 @@ import java.util.Map;
  * @desc the class desc
  */
 public class OpLogContent {
+
     private String tableName;
+
     private Integer type;
+
     private List<Map<String,Object>> before;
+
     private List<Map<String,Object>> after;
 
 

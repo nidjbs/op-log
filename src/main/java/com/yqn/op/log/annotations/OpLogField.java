@@ -13,13 +13,14 @@ import java.lang.annotation.*;
 public @interface OpLogField {
 
     /**
-     * log field desc
+     * log field biz desc
      */
-    String value();
+    String value() default "";
 
     /**
      * db alias，default Camel-Case convert
      */
     String fieldName() default "";
 
+    
 }

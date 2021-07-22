@@ -1,7 +1,5 @@
 package com.yqn.op.log.annotations;
 
-import com.yqn.op.log.core.OpLogBiz;
-
 import java.lang.annotation.*;
 
 /**
@@ -14,6 +12,15 @@ import java.lang.annotation.*;
 @Inherited
 public @interface OpLog {
 
+    /**
+     * biz op description
+     */
     String bizDesc();
 
+    /**
+     * biz id spring el expression
+     *
+     * @return biz id spring el expression
+     */
+    String bizIdEl() default "";
 }

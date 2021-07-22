@@ -1,8 +1,7 @@
 package com.yqn.op.log.core;
 
+import com.yqn.op.log.common.OpLogConstant;
 import com.yqn.op.log.enums.OpLogStatus;
-import com.yqn.op.log.enums.OpLogType;
-import com.yqn.op.log.enums.SqlType;
 import com.yqn.op.log.util.JsonUtil;
 import com.yqn.op.log.util.ObjBuilder;
 
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
  * @date 2021/06/20 20:52
  * @desc the class desc
  */
-public abstract class BaseSqlLogMetaDataService implements ISqlLogMetaDataService {
+public abstract class BaseSqlLogMetaDataService implements ISqlLogMetaDataService, IDbInsertService<OpLogMetaDataDO> {
 
     @Override
     public OpLogMetaDataDO doConvert() {
@@ -40,26 +39,15 @@ public abstract class BaseSqlLogMetaDataService implements ISqlLogMetaDataServic
     private OpLogContent logContentConvert(SqlMetaData sqlMetaData) {
         return ObjBuilder.create(OpLogContent::new)
                 .of(OpLogContent::setTableName, sqlMetaData.getTableName())
-                .of(OpLogContent::setType, convertType(sqlMetaData.getSqlType()).getId())
+                .of(OpLogContent::setType, OpLogConstant.SQL_TYPE_CONVERT_FUN
+                        .apply(sqlMetaData.getSqlType()).getId())
                 .of(OpLogContent::setBefore, sqlMetaData.getBeforeData())
                 .of(OpLogContent::setAfter, sqlMetaData.getAfterData())
                 .build();
     }
 
+    @Override
+    public void insertBatch(List<OpLogMetaDataDO> list) {
 
-    /**
-     *  convert sql type to op log type
-     * @param sqlType sqlType
-     * @return op log type
-     */
-    private OpLogType convertType(SqlType sqlType) {
-        switch (sqlType) {
-            case INSERT:
-                return OpLogType.CREATE;
-            case DELETE:
-                return OpLogType.DELETE;
-            default:
-                return OpLogType.UPDATE;
-        }
     }
 }

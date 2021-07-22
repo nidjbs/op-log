@@ -22,6 +22,18 @@ public class BizTrace {
      */
     private String bizDesc;
 
+    /**
+     * biz id ex: orderId
+     */
+    private String bizId;
+
+    public String getBizId() {
+        return bizId;
+    }
+
+    public void setBizId(String bizId) {
+        this.bizId = bizId;
+    }
 
     public String getTraceId() {
         return traceId;

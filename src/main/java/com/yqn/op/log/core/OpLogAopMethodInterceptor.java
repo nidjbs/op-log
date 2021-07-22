@@ -4,14 +4,24 @@ import com.yqn.op.log.annotations.OpLog;
 import com.yqn.op.log.config.OpLogConfig;
 import com.yqn.op.log.core.mapping.OpLogContextMappingTask;
 import com.yqn.op.log.core.mapping.OpLogMappingProcessCenter;
+import com.yqn.op.log.core.support.BizTraceSupport;
+import com.yqn.op.log.core.support.OpBizIdSupport;
 import com.yqn.op.log.util.*;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Method;
 
 /**
  * @author huayuanlin
  * @date 2021/06/10 20:29
- * @desc the class desc
+ * @desc the core aop interceptor class
  */
 public class OpLogAopMethodInterceptor implements MethodInterceptor {
 
@@ -88,6 +98,10 @@ public class OpLogAopMethodInterceptor implements MethodInterceptor {
             OpLog opLog = methodInvocation.getMethod().getAnnotation(OpLog.class);
             BizTrace bizTrace = opLogContext.getBizTrace();
             bizTrace.setBizDesc(opLog.bizDesc());
+            String bizIdEl = opLog.bizIdEl();
+            // get biz id by spring el
+            Object doEl = doEl(bizIdEl, methodInvocation.getMethod(), methodInvocation.getArguments());
+            OpBizIdSupport.setBizId(doEl);
             ISqlLogMetaDataService logMetaDataService = SpringBeanUtil.getBeanByType(ISqlLogMetaDataService.class);
             Long logId = logMetaDataService.insert(logMetaDataService.doConvert());
             opLogContext.setOpLogId(logId);
@@ -99,4 +113,32 @@ public class OpLogAopMethodInterceptor implements MethodInterceptor {
         return result;
     }
 
+
+    /**
+     * do execute spring el, get biz id
+     *
+     * @return biz id
+     */
+    private Object doEl(String key, Method method, Object[] args) {
+        if (StringUtils.isEmpty(key)) {
+            return key;
+        }
+        // method params
+        LocalVariableTableParameterNameDiscoverer u = new LocalVariableTableParameterNameDiscoverer();
+        String[] paraNameArr = u.getParameterNames(method);
+        ExpressionParser parser = new SpelExpressionParser();
+        // parse key
+        Expression expression = parser.parseExpression(key);
+        assert paraNameArr != null;
+        if (paraNameArr.length == 0) {
+            expression.getValue(Integer.class);
+        }
+        // spring el context
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        // set context params
+        for (int i = 0; i < paraNameArr.length; i++) {
+            context.setVariable(paraNameArr[i], args[i]);
+        }
+        return expression.getValue(context, Object.class);
+    }
 }
