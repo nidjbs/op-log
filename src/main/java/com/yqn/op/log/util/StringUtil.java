@@ -1,5 +1,8 @@
 package com.yqn.op.log.util;
 
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 /**
  * @author ： huayuanlin
  * @date ： 2021/5/23 16:59
@@ -35,5 +38,17 @@ public class StringUtil {
             str = null;
         }
         return str;
+    }
+
+    /**
+     * set if the value
+     *
+     * @param strSet set consumer
+     * @param value the value
+     */
+    public static void setIfNotEmpty(Consumer<String> strSet, String value) {
+        if (isNotEmpty(value)) {
+            strSet.accept(value);
+        }
     }
 }

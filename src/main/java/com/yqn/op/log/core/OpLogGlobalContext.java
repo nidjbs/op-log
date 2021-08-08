@@ -30,7 +30,7 @@ public class OpLogGlobalContext {
     /**
      * opUserId
      */
-    private String opUserId;
+    private String opId;
 
     public String getOpType() {
         return opType;
@@ -64,11 +64,11 @@ public class OpLogGlobalContext {
         this.bizId = bizId;
     }
 
-    public String getOpUserId() {
-        return opUserId;
+    public String getOpId() {
+        return opId;
     }
 
-    public void setOpUserId(String opUserId) {
-        this.opUserId = opUserId;
+    public void setOpId(String opId) {
+        this.opId = opId;
     }
 }

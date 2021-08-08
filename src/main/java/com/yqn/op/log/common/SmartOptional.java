@@ -13,7 +13,7 @@ import java.util.function.Supplier;
  */
 public class SmartOptional<T> {
 
-    private T value;
+    private final T value;
     private Predicate<T> predicate;
 
     private SmartOptional<T> optional;

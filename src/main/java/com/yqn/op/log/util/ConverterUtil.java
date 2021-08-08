@@ -26,6 +26,10 @@ import com.google.common.base.CaseFormat;
  */
 public class ConverterUtil {
 
+    private ConverterUtil() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * to underline str
      *
@@ -34,9 +38,5 @@ public class ConverterUtil {
      */
     public static String camelToUnderline(String srcStr) {
         return CaseFormat.LOWER_CAMEL.converterTo(CaseFormat.LOWER_UNDERSCORE).convert(srcStr);
-    }
-
-    public static void main(String[] args) {
-        System.out.println(camelToUnderline("OrderInfo"));
     }
 }

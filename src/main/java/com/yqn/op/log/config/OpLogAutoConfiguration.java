@@ -5,7 +5,12 @@ import com.yqn.op.log.core.mapping.IMappingLogDbService;
 import com.yqn.op.log.core.mapping.JdbcTemplateMappingLogDbServiceImpl;
 import com.yqn.op.log.core.mapping.OpLogMappingProcessCenter;
 import com.yqn.op.log.core.mapping.ProcessRawMappingBean;
+import com.yqn.op.log.core.web.FeignRequestInterceptor;
 import com.yqn.op.log.util.SpringBeanUtil;
+import feign.Feign;
+import feign.RequestInterceptor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +28,7 @@ public class OpLogAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public OpLogAopProxyCreator opLogAopScanner() {
-        return new OpLogAopProxyCreator(OpLogAopMethodInterceptor.getInstance());
+        return new OpLogAopProxyCreator(new OpLogAopMethodInterceptor());
     }
 
     @Bean
@@ -54,5 +59,11 @@ public class OpLogAutoConfiguration {
     @ConditionalOnMissingBean
     public OpLogMappingProcessCenter opLogMappingProcessCenter() {
         return new OpLogMappingProcessCenter();
+    }
+
+    @Bean
+    @ConditionalOnClass(Feign.class)
+    public RequestInterceptor feignRequestInterceptor() {
+        return new FeignRequestInterceptor();
     }
 }

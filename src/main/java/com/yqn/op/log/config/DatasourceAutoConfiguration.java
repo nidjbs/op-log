@@ -2,6 +2,8 @@ package com.yqn.op.log.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -18,13 +20,14 @@ import javax.sql.DataSource;
  * @desc the class desc
  */
 @Configuration
+@AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class DatasourceAutoConfiguration {
 
 
-    @Bean
-    public DefaultDatasourcePrimarySetterBean defaultDatasourcePrimarySetterBean() {
-        return new DefaultDatasourcePrimarySetterBean();
-    }
+//    @Bean
+//    public DefaultDatasourcePrimarySetterBean defaultDatasourcePrimarySetterBean() {
+//        return new DefaultDatasourcePrimarySetterBean();
+//    }
 
     @Bean("opLogDatasourceProperties")
     @ConfigurationProperties("op.log.datasource")

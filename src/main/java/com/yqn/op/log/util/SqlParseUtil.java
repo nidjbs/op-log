@@ -99,13 +99,4 @@ public class SqlParseUtil {
         return src.substring(src.indexOf(target) + target.length());
     }
 
-    public static void main(String[] args) {
-        String sql = "   UPDATE sy_order \n SET desception = ? ,`state` = ? \n    " +
-                " where id = ?  ";
-        String sql1 = "DELETE FROM `sy_order` WHERE `id` = 11  ";
-        String sql2 = "UPDATE `sy_order` \n SET `desception` = '13223124143WHERE' ,`state` = '1' \n  where id = ?  ";
-        String formatToSelectSqlParam = formatUpdateToSelectSql(sql,"sy_order");
-        System.out.println(formatToSelectSqlParam);
-    }
-
 }

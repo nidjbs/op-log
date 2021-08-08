@@ -25,7 +25,7 @@ public class ManualBizTraceSupport {
         AssertUtil.notNull(bizId, "bizId param");
         OpLogContext opLogContext = OpLogContextProvider.opLogContext();
         AssertUtil.notNull(opLogContext, "op log context");
-        opLogContext.getBizTrace().setBizId(StringUtil.parseStr(bizId));
+        opLogContext.getOpLogGlobalContext().setBizId(StringUtil.parseStr(bizId));
     }
 
     /**
@@ -37,7 +37,7 @@ public class ManualBizTraceSupport {
         AssertUtil.notNull(opId, "opId param");
         OpLogContext opLogContext = OpLogContextProvider.opLogContext();
         AssertUtil.notNull(opLogContext, "op log context");
-        opLogContext.getBizTrace().setBizOpId(StringUtil.parseStr(opId));
+        opLogContext.getOpLogGlobalContext().setOpId(StringUtil.parseStr(opId));
     }
 
 
@@ -50,7 +50,7 @@ public class ManualBizTraceSupport {
         AssertUtil.notNull(traceId, "traceId param");
         OpLogContext opLogContext = OpLogContextProvider.opLogContext();
         AssertUtil.notNull(opLogContext, "op log context");
-        opLogContext.getBizTrace().setTraceId(StringUtil.parseStr(traceId));
+        opLogContext.getOpLogGlobalContext().setTraceId(StringUtil.parseStr(traceId));
     }
 
 }

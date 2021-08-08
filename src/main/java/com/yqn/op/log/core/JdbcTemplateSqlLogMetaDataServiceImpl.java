@@ -34,9 +34,10 @@ public class JdbcTemplateSqlLogMetaDataServiceImpl extends BaseSqlLogMetaDataSer
             preparedStatement.setString(1, opLogMetaDataDO.getTraceId());
             preparedStatement.setString(2, opLogMetaDataDO.getOpId());
             preparedStatement.setString(3, opLogMetaDataDO.getBizId());
-            preparedStatement.setString(4, opLogMetaDataDO.getBizDesc());
+            preparedStatement.setString(4, opLogMetaDataDO.getOpType());
             preparedStatement.setInt(5, opLogMetaDataDO.getStatus());
             preparedStatement.setString(6, opLogMetaDataDO.getMetaData());
+            preparedStatement.setString(7, opLogMetaDataDO.getBizCode());
             return preparedStatement;
         }, keyHolder);
         return Objects.requireNonNull(keyHolder.getKey()).longValue();

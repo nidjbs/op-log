@@ -53,6 +53,21 @@ public class ObjBuilder<T> {
     }
 
     /**
+     * set obj attributes with condition
+     *
+     * @param consumer bi consumer
+     * @param p        params
+     * @param <P>      t
+     * @return builder instance
+     */
+    public <P> ObjBuilder<T> of(boolean condition,BiConsumer<T, P> consumer, P p) {
+        if (condition) {
+            consumers.add(instance -> consumer.accept(instance, p));
+        }
+        return this;
+    }
+
+    /**
      * build pre check
      *
      * @param predicate predicate

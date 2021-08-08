@@ -17,7 +17,7 @@ public class OpLogMetaDataWrapper {
 
     private String bizId;
 
-    private String bizDesc;
+    private String opType;
 
     private List<OpLogContent> opLogContents;
 
@@ -53,12 +53,12 @@ public class OpLogMetaDataWrapper {
         this.bizId = bizId;
     }
 
-    public String getBizDesc() {
-        return bizDesc;
+    public String getOpType() {
+        return opType;
     }
 
-    public void setBizDesc(String bizDesc) {
-        this.bizDesc = bizDesc;
+    public void setOpType(String opType) {
+        this.opType = opType;
     }
 
     public List<OpLogContent> getOpLogContents() {

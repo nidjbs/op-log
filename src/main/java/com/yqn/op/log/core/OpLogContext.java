@@ -2,6 +2,8 @@ package com.yqn.op.log.core;
 
 import java.util.List;
 
+import com.yqn.op.log.util.CollectionsUtil;
+
 /**
  * @author huayuanlin
  * @date 2021/06/12 23:52
@@ -9,11 +11,11 @@ import java.util.List;
  */
 public class OpLogContext {
 
-    private List<SqlMetaData> sqlMetaDataList;
-    private BizTrace bizTrace;
+    private final List<SqlMetaData> sqlMetaDataList = CollectionsUtil.arrayList();
     private Long opLogId;
     private SqlMetaData curSqlMetaData;
     private boolean runAbleTag = true;
+    private OpLogGlobalContext opLogGlobalContext;
 
     public void reset() {
         this.curSqlMetaData = null;
@@ -48,15 +50,12 @@ public class OpLogContext {
         return sqlMetaDataList;
     }
 
-    public void setSqlMetaDataList(List<SqlMetaData> sqlMetaDataList) {
-        this.sqlMetaDataList = sqlMetaDataList;
+
+    public OpLogGlobalContext getOpLogGlobalContext() {
+        return opLogGlobalContext;
     }
 
-    public BizTrace getBizTrace() {
-        return bizTrace;
-    }
-
-    public void setBizTrace(BizTrace bizTrace) {
-        this.bizTrace = bizTrace;
+    public void setOpLogGlobalContext(OpLogGlobalContext opLogGlobalContext) {
+        this.opLogGlobalContext = opLogGlobalContext;
     }
 }

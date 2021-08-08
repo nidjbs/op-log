@@ -31,14 +31,14 @@ public class OpLogContextMappingTask extends AbstractOpLogMappingTask<OpLogConte
     @Override
     public OpLogMetaDataWrapper convert() {
         OpLogContext opLogContext = getT();
-        BizTrace bizTrace = opLogContext.getBizTrace();
+        OpLogGlobalContext opLogGlobalContext = opLogContext.getOpLogGlobalContext();
         Long opLogId = opLogContext.getOpLogId();
         List<OpLogContent> opLogContents = opLogContext.getSqlMetaDataList()
                 .stream().map(CONVERT_FUN).collect(Collectors.toList());
         return ObjBuilder.create(OpLogMetaDataWrapper::new)
-                .of(OpLogMetaDataWrapper::setOpId, bizTrace.getBizOpId())
-                .of(OpLogMetaDataWrapper::setTraceId, bizTrace.getTraceId())
-                .of(OpLogMetaDataWrapper::setBizDesc, bizTrace.getBizDesc())
+                .of(OpLogMetaDataWrapper::setOpId, opLogGlobalContext.getOpId())
+                .of(OpLogMetaDataWrapper::setTraceId, opLogGlobalContext.getTraceId())
+                .of(OpLogMetaDataWrapper::setOpType, opLogGlobalContext.getOpType())
                 .of(OpLogMetaDataWrapper::setId, opLogId)
                 .of(OpLogMetaDataWrapper::setOpLogContents, opLogContents)
                 .build();

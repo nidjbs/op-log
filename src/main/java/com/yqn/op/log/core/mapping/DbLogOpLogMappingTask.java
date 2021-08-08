@@ -26,7 +26,7 @@ public class DbLogOpLogMappingTask extends AbstractOpLogMappingTask<OpLogMetaDat
                 .of(OpLogMetaDataWrapper::setId, opLogMetaData.getId())
                 .of(OpLogMetaDataWrapper::setOpId, opLogMetaData.getOpId())
                 .of(OpLogMetaDataWrapper::setBizId, opLogMetaData.getBizId())
-                .of(OpLogMetaDataWrapper::setBizDesc, opLogMetaData.getBizDesc())
+                .of(OpLogMetaDataWrapper::setOpType, opLogMetaData.getOpType())
                 .of(OpLogMetaDataWrapper::setTraceId, opLogMetaData.getTraceId())
                 .of(OpLogMetaDataWrapper::setOpLogContents, JsonUtil.toArray(metaData, OpLogContent.class))
                 .build();

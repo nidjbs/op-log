@@ -18,16 +18,17 @@ public abstract class BaseSqlLogMetaDataService implements ISqlLogMetaDataServic
     @Override
     public OpLogMetaDataDO doConvert() {
         OpLogContext opLogContext = OpLogContextProvider.opLogContext();
-        BizTrace bizTrace = opLogContext.getBizTrace();
+        OpLogGlobalContext bizTrace = opLogContext.getOpLogGlobalContext();
         List<OpLogContent> opLogContents = opLogContext.getSqlMetaDataList()
                 .stream().map(this::logContentConvert).collect(Collectors.toList());
         return ObjBuilder.create(OpLogMetaDataDO::new)
-                .of(OpLogMetaDataDO::setBizDesc, bizTrace.getBizDesc())
-                .of(OpLogMetaDataDO::setOpId, bizTrace.getBizOpId())
+                .of(OpLogMetaDataDO::setBizId, bizTrace.getBizId())
+                .of(OpLogMetaDataDO::setOpId, bizTrace.getOpId())
                 .of(OpLogMetaDataDO::setStatus, OpLogStatus.INIT.getId())
                 .of(OpLogMetaDataDO::setTraceId, bizTrace.getTraceId())
                 .of(OpLogMetaDataDO::setMetaData, JsonUtil.toJsonString(opLogContents))
-                .of(OpLogMetaDataDO::setBizId, bizTrace.getBizId())
+                .of(OpLogMetaDataDO::setBizCode, bizTrace.getBizCode())
+                .of(OpLogMetaDataDO::setOpType,bizTrace.getOpType())
                 .build();
     }
 

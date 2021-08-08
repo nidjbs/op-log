@@ -61,6 +61,11 @@ public abstract class AbstractOpLogAopProxyCreator extends AbstractAutoProxyCrea
         }
     }
 
+    /**
+     * aop annotation
+     *
+     * @return annotation clazz
+     */
     protected abstract Class<? extends Annotation> aopOpLogAnnotation();
 
 

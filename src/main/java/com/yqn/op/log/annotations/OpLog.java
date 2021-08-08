@@ -13,9 +13,10 @@ import java.lang.annotation.*;
 public @interface OpLog {
 
     /**
-     * biz op description
+     * biz op type,if the upper-level service is maintained, it is recommended not to maintain it
+     * @see OpLogGlobal
      */
-    String bizDesc() default "";
+    String bizType() default "";
 
     /**
      * biz id spring el expression
