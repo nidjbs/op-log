@@ -1,8 +1,7 @@
 package com.yqn.op.log.core.mybatis.processor;
 
-import com.yqn.op.log.core.mybatis.MybatisInvocationWrapper;
-import com.yqn.op.log.core.mybatis.MybatisOpLogInterceptorProcessor;
-import com.yqn.op.log.util.MapsUtil;
+import com.yqn.op.log.core.mybatis.MybatisParseDataProcessor;
+import com.yqn.op.log.core.mybatis.ParseContext;
 
 import java.util.List;
 import java.util.Map;
@@ -12,12 +11,12 @@ import java.util.Map;
  * @date 2021/06/19 13:39
  * @desc the class desc
  */
-public class SoftDeleteMybatisOpLogInterceptorProcessor extends MybatisOpLogInterceptorProcessor {
+public class SoftDeleteMybatisOpLogInterceptorProcessor extends MybatisParseDataProcessor {
 
 
     @Override
-    public List<Map<String, Object>> getBeforeDataList(MybatisInvocationWrapper invocationWrapper) {
-        return DeleteMybatisOpLogInterceptorProcessor.getInstance().getBeforeDataList(invocationWrapper);
+    public List<Map<String, Object>> parseBeforeData(ParseContext context) {
+        return DeleteMybatisOpLogInterceptorProcessor.getInstance().parseBeforeData(context);
     }
 
     public static SoftDeleteMybatisOpLogInterceptorProcessor getInstance() {

@@ -1,41 +1,32 @@
 package com.yqn.op.log.core.mybatis.processor;
 
-import com.yqn.op.log.core.mybatis.MybatisInvocationWrapper;
-import com.yqn.op.log.core.mybatis.MybatisOpLogInterceptorProcessor;
-import com.yqn.op.log.util.BeanUtil;
+import com.yqn.op.log.annotations.OpLogDbField;
+import com.yqn.op.log.core.mybatis.MybatisParseDataProcessor;
+import com.yqn.op.log.core.mybatis.ParseContext;
 import com.yqn.op.log.util.CollectionsUtil;
+import com.yqn.op.log.util.ConverterUtil;
 import com.yqn.op.log.util.MapsUtil;
 import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.session.Configuration;
-import org.springframework.beans.BeanUtils;
-import org.springframework.cglib.beans.BeanMap;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.util.*;
 
 /**
  * @author huayuanlin
  * @date 2021/06/15 22:49
  * @desc the insert MybatisOpLogInterceptorProcessor
  */
-@SuppressWarnings("all")
-public class InsertMybatisOpLogInterceptorProcessor extends MybatisOpLogInterceptorProcessor {
+public class InsertMybatisOpLogInterceptorProcessor extends MybatisParseDataProcessor {
 
     private InsertMybatisOpLogInterceptorProcessor() {
 
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<Map<String, Object>> getAfterDataList(MybatisInvocationWrapper invocationWrapper) {
-        BoundSql boundSql = invocationWrapper.getBoundSql();
-        Configuration configuration = invocationWrapper.getMappedStatement().getConfiguration();
+    public List<Map<String, Object>> parseAfterData(ParseContext context) {
+        BoundSql boundSql = context.getBoundSql();
         Object parameterObject = boundSql.getParameterObject();
-        List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
-        MetaObject metaObject = configuration.newMetaObject(parameterObject);
         List<Map<String, Object>> resultList = CollectionsUtil.arrayList();
         // batch insert
         if (parameterObject instanceof Map) {
@@ -44,25 +35,49 @@ public class InsertMybatisOpLogInterceptorProcessor extends MybatisOpLogIntercep
                 if (v instanceof List) {
                     temp.add((List<Object>) v);
                 } else {
-                    LOGGER.debug("op log batch insert only support list params");
+                    LOGGER.warn("op log batch insert only support list params");
                 }
             });
-            Iterator<List<Object>> iterator = temp.iterator();
-            while (iterator.hasNext()) {
-                List<Object> next = iterator.next();
-                next.forEach(e -> resultList.add(BeanUtil.toMap(e)));
-            }
+            temp.stream().filter(Objects::nonNull).forEach(e -> resultList.add(convertToMap(e)));
         } else {
-            Map<String, Object> result = MapsUtil.hashMap();
-            parameterMappings.forEach(parameterMapping -> {
-                String property = parameterMapping.getProperty();
-                Object value = metaObject.getValue(property);
-                result.put(property, value);
-            });
-            resultList.add(result);
+            // single insert
+            resultList.add(convertToMap(parameterObject));
         }
         return resultList;
     }
+
+
+    /**
+     * convert to map（process the annotation @OpLogDbField）
+     *
+     * @param obj obj
+     * @return result
+     * @see OpLogDbField
+     */
+    private Map<String, Object> convertToMap(Object obj) {
+        Class<?> clazz = obj.getClass();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        Map<String, Object> result = MapsUtil.hashMap();
+        for (Field field : declaredFields) {
+            OpLogDbField opLogDbField = field.getAnnotation(OpLogDbField.class);
+            Object value = null;
+            try {
+                field.setAccessible(true);
+                value = field.get(obj);
+            } catch (IllegalAccessException e) {
+                LOGGER.error("reflection invoke fail", e);
+            }
+            Optional.ofNullable(value).ifPresent(v -> {
+                if (opLogDbField != null) {
+                    result.put(opLogDbField.value(), v);
+                } else {
+                    result.put(ConverterUtil.camelToUnderline(field.getName()), v);
+                }
+            });
+        }
+        return result;
+    }
+
 
     public static InsertMybatisOpLogInterceptorProcessor getInstance() {
         return Holder.INSTANCE;

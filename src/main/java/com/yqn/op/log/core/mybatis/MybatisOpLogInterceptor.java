@@ -1,11 +1,17 @@
 package com.yqn.op.log.core.mybatis;
 
-import com.yqn.op.log.common.Tuple;
+import com.yqn.op.log.common.SmartOptional;
 import com.yqn.op.log.core.*;
+import com.yqn.op.log.exception.FrameworkException;
+import com.yqn.op.log.util.SafeUtil;
+import com.yqn.op.log.util.SpringBeanUtil;
+import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.statement.StatementHandler;
+import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.*;
 
 import java.sql.Connection;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -13,33 +19,49 @@ import java.util.Properties;
  * @date 2021/06/10 20:18
  * @desc the class desc
  */
-@Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})})
-public class MybatisOpLogInterceptor implements Interceptor, ISqlOpLogInterceptor {
+@Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class}),
+        @Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class})})
+public class MybatisOpLogInterceptor implements Interceptor {
 
 
     @Override
-    public Object intercept(Invocation invocation) {
-        // parse
-        MybatisOpLogInterceptorProcessor instance = MybatisOpLogInterceptorProcessor.getInstance();
-        Tuple<SqlMetaData, Object> sqlMetaDataObjectTuple = instance.parseMetaData(invocation);
-        Object r = sqlMetaDataObjectTuple.getR();
-        SqlMetaData sqlMetaData = sqlMetaDataObjectTuple.getT();
+    public Object intercept(Invocation invocation) throws Exception {
+        Object obj = PluginUtil.getTarget(invocation.getTarget());
         OpLogContext opLogContext = OpLogContextProvider.opLogContext();
-        // is need log
-        if (!sqlMetaData.isNeedLog()) {
-            opLogContext.getSqlMetaDataList().remove(opLogContext.getCurSqlCount());
-            return r;
+        if (obj instanceof Executor) {
+            Object result = invocation.proceed();
+            SafeUtil.safeExecute(() -> {
+                if (!opLogContext.isRunAbleTag()) {
+                    opLogContext.reset();
+                    return;
+                }
+                // sql is execute,do the call back and get after data
+                List<SqlMetaData> sqlMetaDataList = opLogContext.getSqlMetaDataList();
+                MybatisSqlMetaData curSqlMetaData = (MybatisSqlMetaData) opLogContext.getCurSqlMetaData();
+                SmartOptional.ofNullable(curSqlMetaData).ifPresent(MybatisSqlMetaData::doCallBack);
+                sqlMetaDataList.add(curSqlMetaData);
+                opLogContext.reset();
+            }, Throwable.class);
+            return result;
+        } else if (obj instanceof StatementHandler) {
+            SafeUtil.safeExecute(() -> {
+                // parse meta data
+                OpLogInterceptorProcessor processor =
+                        SpringBeanUtil.getBeanByType(OpLogInterceptorProcessor.class);
+                SmartOptional.ofNullable(processor.parseMetaData(invocation)).ifPresent(opLogContext::setCurSqlMetaData);
+            }, () -> opLogContext.setRunAbleTag(false), FrameworkException.class);
+            return invocation.proceed();
         }
-        opLogContext.setCurSqlCount(opLogContext.getCurSqlCount() + 1);
-        return r;
+        throw new FrameworkException("unknown exception");
     }
 
     @Override
     public Object plugin(Object target) {
-        if (!(target instanceof StatementHandler)) {
+        if (target instanceof StatementHandler || target instanceof Executor) {
+            return Plugin.wrap(target, this);
+        } else {
             return target;
         }
-        return Plugin.wrap(target, this);
     }
 
     @Override

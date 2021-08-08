@@ -1,6 +1,5 @@
 package com.yqn.op.log.core;
 
-import com.yqn.op.log.annotations.OpLog;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
@@ -9,6 +8,7 @@ import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -17,17 +17,24 @@ import java.util.stream.Stream;
 
 /**
  * @author huayuanlin
- * @date 2021/06/10 20:12
+ * @date 2021/08/07 20:43
  * @desc the class desc
  */
-public class OpLogAopScanner extends AbstractAutoProxyCreator {
+public abstract class AbstractOpLogAopProxyCreator extends AbstractAutoProxyCreator {
 
-    private static final Set<String> ALREADY_PROXY_BEAN_SET = new HashSet<>();
 
-    private static final Object LOCK = new Object();
+    private final Set<String> ALREADY_PROXY_BEAN_SET = new HashSet<>();
 
-    private MethodInterceptor interceptor;
+    private final Object LOCK = new Object();
 
+    private final MethodInterceptor interceptor;
+
+    public AbstractOpLogAopProxyCreator(MethodInterceptor interceptor) {
+        this.interceptor = interceptor;
+    }
+
+
+    @SuppressWarnings("NullableProblems")
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
         synchronized (LOCK) {
@@ -37,9 +44,6 @@ public class OpLogAopScanner extends AbstractAutoProxyCreator {
             Class<?> targetClass = AopUtils.getTargetClass(bean);
             if (!existAnnotation(targetClass)) {
                 return bean;
-            }
-            if (interceptor == null) {
-                interceptor = new OpLogAopMethodInterceptor();
             }
             try {
                 if (!AopUtils.isAopProxy(bean)) {
@@ -57,6 +61,8 @@ public class OpLogAopScanner extends AbstractAutoProxyCreator {
         }
     }
 
+    protected abstract Class<? extends Annotation> aopOpLogAnnotation();
+
 
     /**
      * is exist annotation
@@ -67,8 +73,8 @@ public class OpLogAopScanner extends AbstractAutoProxyCreator {
     private boolean existAnnotation(Class<?> targetClass) {
         Method[] methods = targetClass.getMethods();
         for (Method method : methods) {
-            OpLog opLog = method.getAnnotation(OpLog.class);
-            if (opLog != null) {
+            Annotation annotation = method.getAnnotation(aopOpLogAnnotation());
+            if (annotation != null) {
                 return true;
             }
         }
@@ -83,7 +89,7 @@ public class OpLogAopScanner extends AbstractAutoProxyCreator {
      * @return bean Advisor
      * @throws Exception ex
      */
-    public static AdvisedSupport getCurProxyAdvisedSupportField(Object proxy) throws Exception {
+    private AdvisedSupport getCurProxyAdvisedSupportField(Object proxy) throws Exception {
         Field h;
         if (AopUtils.isJdkDynamicProxy(proxy)) {
             h = proxy.getClass().getSuperclass().getDeclaredField("h");
@@ -97,6 +103,7 @@ public class OpLogAopScanner extends AbstractAutoProxyCreator {
         return (AdvisedSupport) advised.get(dynamicAdvisedInterceptor);
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class<?> aClass, String s, TargetSource targetSource) throws BeansException {
         return new Object[]{interceptor};

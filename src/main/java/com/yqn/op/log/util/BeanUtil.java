@@ -29,7 +29,10 @@ public class BeanUtil {
         Map<String, Object> result = MapsUtil.hashMap();
         BeanMap beanMap = BeanMap.create(bean);
         for (Object key : beanMap.keySet()) {
-            result.put((String) key, beanMap.get(key));
+            Object value = beanMap.get(key);
+            if (value != null) {
+                result.put((String) key, value);
+            }
         }
         return result;
     }

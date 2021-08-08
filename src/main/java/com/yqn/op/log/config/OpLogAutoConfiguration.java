@@ -1,8 +1,6 @@
 package com.yqn.op.log.config;
 
-import com.yqn.op.log.core.ISqlLogMetaDataService;
-import com.yqn.op.log.core.JdbcTemplateSqlLogMetaDataServiceImpl;
-import com.yqn.op.log.core.OpLogAopScanner;
+import com.yqn.op.log.core.*;
 import com.yqn.op.log.core.mapping.IMappingLogDbService;
 import com.yqn.op.log.core.mapping.JdbcTemplateMappingLogDbServiceImpl;
 import com.yqn.op.log.core.mapping.OpLogMappingProcessCenter;
@@ -24,13 +22,15 @@ public class OpLogAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public OpLogAopScanner opLogAopScanner() {
-        return new OpLogAopScanner();
+    public OpLogAopProxyCreator opLogAopScanner() {
+        return new OpLogAopProxyCreator(OpLogAopMethodInterceptor.getInstance());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessRawMappingBean processRawMappingBean() { return new ProcessRawMappingBean(); }
+    public ProcessRawMappingBean processRawMappingBean() {
+        return new ProcessRawMappingBean();
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -40,13 +40,13 @@ public class OpLogAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ISqlLogMetaDataService iSqlLogMetaDataService(){
+    public ISqlLogMetaDataService iSqlLogMetaDataService() {
         return new JdbcTemplateSqlLogMetaDataServiceImpl();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IMappingLogDbService jdbcMappingLogService(){
+    public IMappingLogDbService jdbcMappingLogService() {
         return new JdbcTemplateMappingLogDbServiceImpl();
     }
 

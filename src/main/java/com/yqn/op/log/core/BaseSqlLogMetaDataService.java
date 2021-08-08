@@ -3,7 +3,7 @@ package com.yqn.op.log.core;
 import com.yqn.op.log.common.OpLogConstant;
 import com.yqn.op.log.enums.OpLogStatus;
 import com.yqn.op.log.util.JsonUtil;
-import com.yqn.op.log.util.ObjBuilder;
+import com.yqn.op.log.common.ObjBuilder;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +27,7 @@ public abstract class BaseSqlLogMetaDataService implements ISqlLogMetaDataServic
                 .of(OpLogMetaDataDO::setStatus, OpLogStatus.INIT.getId())
                 .of(OpLogMetaDataDO::setTraceId, bizTrace.getTraceId())
                 .of(OpLogMetaDataDO::setMetaData, JsonUtil.toJsonString(opLogContents))
+                .of(OpLogMetaDataDO::setBizId, bizTrace.getBizId())
                 .build();
     }
 
@@ -39,8 +40,7 @@ public abstract class BaseSqlLogMetaDataService implements ISqlLogMetaDataServic
     private OpLogContent logContentConvert(SqlMetaData sqlMetaData) {
         return ObjBuilder.create(OpLogContent::new)
                 .of(OpLogContent::setTableName, sqlMetaData.getTableName())
-                .of(OpLogContent::setType, OpLogConstant.SQL_TYPE_CONVERT_FUN
-                        .apply(sqlMetaData.getSqlType()).getId())
+                .of(OpLogContent::setType, OpLogConstant.SQL_TYPE_CONVERT_FUN.apply(sqlMetaData.getSqlType()).getId())
                 .of(OpLogContent::setBefore, sqlMetaData.getBeforeData())
                 .of(OpLogContent::setAfter, sqlMetaData.getAfterData())
                 .build();

@@ -1,16 +1,17 @@
 package com.yqn.op.log.core.mybatis.processor;
 
-import com.yqn.op.log.common.OpLogConstant;
-import com.yqn.op.log.core.mybatis.MybatisInvocationWrapper;
-import com.yqn.op.log.core.mybatis.MybatisOpLogInterceptorProcessor;
+import com.yqn.op.log.core.mybatis.MybatisParseDataProcessor;
+import com.yqn.op.log.core.mybatis.ParseContext;
 import com.yqn.op.log.core.mybatis.MybatisSqlMetaData;
 import com.yqn.op.log.util.CollectionsUtil;
+import com.yqn.op.log.util.SqlParseUtil;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 
 import java.sql.Connection;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,26 +20,40 @@ import java.util.Map;
  * @date 2021/06/17 14:21
  * @desc the update MybatisOpLogInterceptorProcessor
  */
-public class UpdateMybatisOpLogInterceptorProcessor extends MybatisOpLogInterceptorProcessor {
+public class UpdateMybatisOpLogInterceptorProcessor extends MybatisParseDataProcessor {
 
     private UpdateMybatisOpLogInterceptorProcessor() {
 
     }
 
+    @Override
+    public List<Map<String, Object>> parseBeforeData(ParseContext context) {
+        // separate update column and condition
+        MybatisSqlMetaData sqlMetaDataByContext = (MybatisSqlMetaData) context.getSqlMetaData();
+        String sql = sqlMetaDataByContext.getSql();
+        String selectSqlParam = SqlParseUtil.formatToSelectSqlParam(sql);
+        BoundSql boundSql = context.getBoundSql();
+        // get connection
+        Connection connection = context.getConnection();
+        String selectSql = SqlParseUtil.formatUpdateToSelectSql(sql, sqlMetaDataByContext.getTableName());
+        Configuration configuration = context.getMappedStatement().getConfiguration();
+        List<Object> sqlParams = getSqlParams(selectSqlParam, boundSql, configuration);
+        // cache for after query
+        CacheParam cacheParam = new CacheParam();
+        cacheParam.setSelectSql(selectSql);
+        cacheParam.setSelectParams(sqlParams);
+        context.setCache(cacheParam);
+        return doSelect(connection, selectSql, sqlParams);
+    }
 
     @Override
-    public List<Map<String, Object>> getBeforeDataList(MybatisInvocationWrapper invocationWrapper) {
-        // separate update column and condition
-        MybatisSqlMetaData sqlMetaDataByContext = getSqlMetaDataByContext();
-        String sql = sqlMetaDataByContext.getSql();
-        String selectSqlParam = formatToSelectSqlParam(sql);
-        BoundSql boundSql = invocationWrapper.getBoundSql();
-        Object[] args = invocationWrapper.getInvocation().getArgs();
+    public List<Map<String, Object>> parseAfterData(ParseContext context) {
+        CacheParam cache = (CacheParam) context.getCache();
+        List<Object> selectParams = cache.getSelectParams();
+        String selectSql = cache.getSelectSql();
         // get connection
-        Connection connection = (Connection) args[0];
-        String selectSql = getSelectSql(sql, sqlMetaDataByContext.getTableName());
-        Configuration configuration = invocationWrapper.getMappedStatement().getConfiguration();
-        return doSelect(connection, selectSql, getSqlParams(selectSqlParam, boundSql, configuration));
+        Connection connection = context.getConnection();
+        return doSelect(connection, selectSql, selectParams);
     }
 
     /**
@@ -50,65 +65,42 @@ public class UpdateMybatisOpLogInterceptorProcessor extends MybatisOpLogIntercep
      * @return sql prams
      */
     private List<Object> getSqlParams(String selectSqlParam, BoundSql boundSql, Configuration configuration) {
-        // count contain param
-        char[] chars = selectSqlParam.toCharArray();
-        int count = 0;
-        for (char aChar : chars) {
-            if (aChar == '?') {
-                count++;
-            }
-        }
+        // count contain ? param
+        int count = (int) Arrays.stream(selectSqlParam.split("")).filter("?"::equals).count();
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
         Object parameterObject = boundSql.getParameterObject();
         MetaObject metaObject = configuration.newMetaObject(parameterObject);
         int size = parameterMappings.size();
         List<Object> params = CollectionsUtil.arrayList();
+        // get the after where's condition param value
         for (int i = size - count; i < size; i++) {
             params.add(metaObject.getValue(parameterMappings.get(i).getProperty()));
         }
         return params;
     }
 
-    /**
-     * update sql to select
-     * ex: update A set a = ?, b = ? where id = ?  => select a,b from A where id = ?
-     *
-     * @param updateSql src sql
-     * @param tableName tableName
-     * @return select sql
-     */
-    private String getSelectSql(String updateSql, String tableName) {
-        // get param sql : where id = ?
-        String selectSqlParam = formatToSelectSqlParam(updateSql.toUpperCase());
-        // Remove update
-        String var1 = removeStr(updateSql.toUpperCase(), OpLogConstant.UPDATE);
-        // remove table name
-        String var2 = removeStr(var1, tableName);
-        // remove set
-        String var3 = removeStr(var2, OpLogConstant.SET);
-        // => a = ? ,
-        String var4 = var3.substring(0, var3.lastIndexOf(OpLogConstant.WHERE));
-        String var5 = var4.replaceAll(" ","")
-                .replaceAll("\\n","").replaceAll("=?", " ");
-        return String.format(OpLogConstant.SELECT_SQL_FORMAT, var5, tableName, selectSqlParam);
-    }
+    protected static class CacheParam {
 
-    private String removeStr(String src, String target) {
-        return src.substring(src.indexOf(target) + target.length());
-    }
+        private String selectSql;
 
-    /**
-     * format to select sql params sql
-     * ex: update A set a = ?, b = ? where id = ?  => id = ?
-     *
-     * @param updateSql updateSql sql
-     * @return select sql params sql
-     */
-    private String formatToSelectSqlParam(String updateSql) {
-        String toUpperCase = updateSql.toUpperCase();
-        return toUpperCase.substring(toUpperCase.lastIndexOf(OpLogConstant.WHERE) + OpLogConstant.WHERE.length());
-    }
+        private List<Object> selectParams;
 
+        public String getSelectSql() {
+            return selectSql;
+        }
+
+        public void setSelectSql(String selectSql) {
+            this.selectSql = selectSql;
+        }
+
+        public List<Object> getSelectParams() {
+            return selectParams;
+        }
+
+        public void setSelectParams(List<Object> selectParams) {
+            this.selectParams = selectParams;
+        }
+    }
 
     public static UpdateMybatisOpLogInterceptorProcessor getInstance() {
         return UpdateMybatisOpLogInterceptorProcessor.Holder.INSTANCE;

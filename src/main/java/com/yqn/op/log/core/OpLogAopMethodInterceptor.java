@@ -1,19 +1,24 @@
 package com.yqn.op.log.core;
 
 import com.yqn.op.log.annotations.OpLog;
+import com.yqn.op.log.common.SmartOptional;
 import com.yqn.op.log.config.OpLogConfig;
 import com.yqn.op.log.core.mapping.OpLogContextMappingTask;
 import com.yqn.op.log.core.mapping.OpLogMappingProcessCenter;
+import com.yqn.op.log.core.mybatis.processor.DeleteMybatisOpLogInterceptorProcessor;
 import com.yqn.op.log.core.support.BizTraceSupport;
 import com.yqn.op.log.core.support.OpBizIdSupport;
 import com.yqn.op.log.util.*;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
@@ -25,7 +30,22 @@ import java.lang.reflect.Method;
  */
 public class OpLogAopMethodInterceptor implements MethodInterceptor {
 
-    protected static final ThreadLocal<OpLogContext> OP_LOG_CONTEXT = ThreadLocal.withInitial(OpLogAopMethodInterceptor::initOpLogContext);
+    private OpLogAopMethodInterceptor() {
+
+    }
+
+    public static OpLogAopMethodInterceptor getInstance() {
+        return OpLogAopMethodInterceptor.Holder.INSTANCE;
+    }
+
+    private static class Holder {
+        private static final OpLogAopMethodInterceptor INSTANCE = new OpLogAopMethodInterceptor();
+    }
+
+    protected static final ThreadLocal<OpLogContext> OP_LOG_CONTEXT =
+            ThreadLocal.withInitial(OpLogAopMethodInterceptor::initOpLogContext);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpLogAopMethodInterceptor.class);
 
     /**
      * init op log context
@@ -36,6 +56,7 @@ public class OpLogAopMethodInterceptor implements MethodInterceptor {
         BizTraceSupport bizTraceSupport = SpringBeanUtil.getBeanByType(BizTraceSupport.class);
         OpLogContext opLogContext = new OpLogContext();
         if (bizTraceSupport == null) {
+            LOGGER.warn("bizTraceSupport bean not exist");
             return opLogContext;
         }
         String opId = bizTraceSupport.opId();
@@ -71,7 +92,7 @@ public class OpLogAopMethodInterceptor implements MethodInterceptor {
         manualTxParams.setTimeout(opLogConfig.getManualTxTimeOut());
         manualTxParams.setFunc(param -> {
             try {
-                return invoke(methodInvocation);
+                return this.invoke(methodInvocation);
             } catch (Throwable throwable) {
                 throw new RuntimeException(throwable);
             }
@@ -87,58 +108,33 @@ public class OpLogAopMethodInterceptor implements MethodInterceptor {
      */
     private Object runWithTx(MethodInvocation methodInvocation) throws Throwable {
         Object result;
+        // process the execution logic (sql invocation)
+        result = methodInvocation.proceed();
         try {
-            // process (sql invocation)
-            result = methodInvocation.proceed();
             // sync record log
             OpLogContext opLogContext = OpLogContextProvider.opLogContext();
             if (opLogContext == null) {
                 return result;
             }
-            OpLog opLog = methodInvocation.getMethod().getAnnotation(OpLog.class);
+            OpLog opLog = methodInvocation.getMethod().getDeclaredAnnotation(OpLog.class);
+            AssertUtil.notNull(opLog, "op Log annotation");
             BizTrace bizTrace = opLogContext.getBizTrace();
             bizTrace.setBizDesc(opLog.bizDesc());
             String bizIdEl = opLog.bizIdEl();
             // get biz id by spring el
-            Object doEl = doEl(bizIdEl, methodInvocation.getMethod(), methodInvocation.getArguments());
-            OpBizIdSupport.setBizId(doEl);
+            Object doEl = SpringUtil.doExecuteEl(bizIdEl, methodInvocation.getMethod(), methodInvocation.getArguments());
+            SmartOptional.ofNullable(doEl)
+                    .ifPresent(elResult -> opLogContext.getBizTrace().setBizId(StringUtil.parseStr(elResult)));
             ISqlLogMetaDataService logMetaDataService = SpringBeanUtil.getBeanByType(ISqlLogMetaDataService.class);
             Long logId = logMetaDataService.insert(logMetaDataService.doConvert());
             opLogContext.setOpLogId(logId);
             // async process mapping
             OpLogMappingProcessCenter.submitTask(new OpLogContextMappingTask(opLogContext));
+        } catch (Exception exx) {
+            LOGGER.warn("sync record log process fail,does not affect the execution logic", exx);
         } finally {
             OP_LOG_CONTEXT.remove();
         }
         return result;
-    }
-
-
-    /**
-     * do execute spring el, get biz id
-     *
-     * @return biz id
-     */
-    private Object doEl(String key, Method method, Object[] args) {
-        if (StringUtils.isEmpty(key)) {
-            return key;
-        }
-        // method params
-        LocalVariableTableParameterNameDiscoverer u = new LocalVariableTableParameterNameDiscoverer();
-        String[] paraNameArr = u.getParameterNames(method);
-        ExpressionParser parser = new SpelExpressionParser();
-        // parse key
-        Expression expression = parser.parseExpression(key);
-        assert paraNameArr != null;
-        if (paraNameArr.length == 0) {
-            expression.getValue(Integer.class);
-        }
-        // spring el context
-        StandardEvaluationContext context = new StandardEvaluationContext();
-        // set context params
-        for (int i = 0; i < paraNameArr.length; i++) {
-            context.setVariable(paraNameArr[i], args[i]);
-        }
-        return expression.getValue(context, Object.class);
     }
 }

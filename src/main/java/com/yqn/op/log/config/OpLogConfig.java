@@ -12,7 +12,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "op.log")
 public class OpLogConfig {
 
-    /*** need log table names */
+    /*** need log table names，lower case */
     private List<String> logTables;
     /*** manualTxTimeOut unit：s */
     private Integer manualTxTimeOut;

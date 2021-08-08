@@ -15,7 +15,7 @@ public @interface OpLog {
     /**
      * biz op description
      */
-    String bizDesc();
+    String bizDesc() default "";
 
     /**
      * biz id spring el expression

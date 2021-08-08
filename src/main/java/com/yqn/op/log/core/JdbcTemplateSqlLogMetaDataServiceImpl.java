@@ -2,6 +2,8 @@ package com.yqn.op.log.core;
 
 import com.yqn.op.log.common.OpLogConstant;
 import com.yqn.op.log.enums.OpLogStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -10,6 +12,7 @@ import javax.annotation.Resource;
 import java.sql.PreparedStatement;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author huayuanlin
@@ -19,8 +22,8 @@ import java.util.List;
 public class JdbcTemplateSqlLogMetaDataServiceImpl extends BaseSqlLogMetaDataService {
 
     @Resource
+    @Qualifier("opLogJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
-
 
     @Override
     public Long insert(OpLogMetaDataDO opLogMetaDataDO) {
@@ -36,7 +39,7 @@ public class JdbcTemplateSqlLogMetaDataServiceImpl extends BaseSqlLogMetaDataSer
             preparedStatement.setString(6, opLogMetaDataDO.getMetaData());
             return preparedStatement;
         }, keyHolder);
-        return keyHolder.getKey().longValue();
+        return Objects.requireNonNull(keyHolder.getKey()).longValue();
     }
 
     @Override

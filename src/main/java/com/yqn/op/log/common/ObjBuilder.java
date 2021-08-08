@@ -1,9 +1,11 @@
-package com.yqn.op.log.util;
+package com.yqn.op.log.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -16,6 +18,8 @@ public class ObjBuilder<T> {
     private Supplier<T> createInstance;
     
     private List<Consumer<T>> consumers;
+
+    private Predicate<T> predicate;
 
     private ObjBuilder() {
 
@@ -49,6 +53,17 @@ public class ObjBuilder<T> {
     }
 
     /**
+     * build pre check
+     *
+     * @param predicate predicate
+     * @return this
+     */
+    public ObjBuilder<T> preCheck(Predicate<T> predicate) {
+        this.predicate =predicate;
+        return this;
+    }
+
+    /**
      * build obj
      *
      * @return obj
@@ -57,6 +72,9 @@ public class ObjBuilder<T> {
         T t = createInstance.get();
         for (Consumer<T> consumer : consumers) {
             consumer.accept(t);
+        }
+        if (predicate != null && !predicate.test(t)) {
+            throw new IllegalArgumentException("build obj fail,contains the attribute that the verification fails!");
         }
         return t;
     }

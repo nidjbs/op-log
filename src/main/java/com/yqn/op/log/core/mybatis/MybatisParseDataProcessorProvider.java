@@ -1,10 +1,7 @@
 package com.yqn.op.log.core.mybatis;
 
+import com.yqn.op.log.core.mybatis.processor.*;
 import com.yqn.op.log.exception.FrameworkException;
-import com.yqn.op.log.core.mybatis.processor.DeleteMybatisOpLogInterceptorProcessor;
-import com.yqn.op.log.core.mybatis.processor.InsertMybatisOpLogInterceptorProcessor;
-import com.yqn.op.log.core.mybatis.processor.SoftDeleteMybatisOpLogInterceptorProcessor;
-import com.yqn.op.log.core.mybatis.processor.UpdateMybatisOpLogInterceptorProcessor;
 import com.yqn.op.log.enums.SqlType;
 
 /**
@@ -12,9 +9,9 @@ import com.yqn.op.log.enums.SqlType;
  * @date 2021/06/16 11:28
  * @desc the class desc
  */
-public class OpLogInterceptorProcessorProvider {
+public class MybatisParseDataProcessorProvider {
 
-    private OpLogInterceptorProcessorProvider() {
+    private MybatisParseDataProcessorProvider() {
         throw new UnsupportedOperationException();
     }
 
@@ -24,7 +21,7 @@ public class OpLogInterceptorProcessorProvider {
      * @param sqlType sql type
      * @return interceptor processor
      */
-    public static MybatisOpLogInterceptorProcessor mybatisOpLogInterceptorProcessor(SqlType sqlType) {
+    public static MybatisParseDataProcessor mybatisParseDataProcessor(SqlType sqlType) {
         switch (sqlType) {
             case INSERT:
                 return InsertMybatisOpLogInterceptorProcessor.getInstance();

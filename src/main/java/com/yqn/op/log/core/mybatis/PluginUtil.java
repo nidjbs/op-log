@@ -25,6 +25,7 @@ public class PluginUtil {
      * @param target target
      * @return meta target obj
      */
+    @SuppressWarnings("unchecked")
     public static <T> T getTarget(Object target) {
         if (Proxy.isProxyClass(target.getClass())) {
             MetaObject metaObject = SystemMetaObject.forObject(target);

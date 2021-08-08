@@ -1,5 +1,7 @@
 package com.yqn.op.log.core.support;
 
+import com.yqn.op.log.config.OpLogGlobalConfig;
+
 /**
  * @author huayuanlin
  * @date 2021/06/17 10:29
@@ -24,5 +26,13 @@ public interface BizTraceSupport {
      * @return bizId str
      */
     String bizId();
+
+    /**
+     * optional
+     * but, the OpLogGlobalConfig.bizCode higher priority
+     * @see OpLogGlobalConfig
+     * @return bizCode str
+     */
+    String bizCode();
 
 }

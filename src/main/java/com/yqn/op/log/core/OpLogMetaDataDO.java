@@ -1,5 +1,7 @@
 package com.yqn.op.log.core;
 
+import java.util.Date;
+
 /**
  * @author huayuanlin
  * @date 2021/06/20 15:46
@@ -13,21 +15,33 @@ public class OpLogMetaDataDO {
 
     private String opId;
 
+    private String opType;
+
+    private String bizCode;
+
     private String bizId;
 
-    private String bizDesc;
     /**
      * log status: 0-init，1-processing，2-fail，3-complete
      */
     private Integer status;
 
     /**
-     * json
+     * metaData json
      */
     private String metaData;
 
-    public String getBizDesc() {
-        return bizDesc;
+    /**
+     * createdTime
+     */
+    private Date createdTime;
+
+    public Date getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(Date createdTime) {
+        this.createdTime = createdTime;
     }
 
     public String getTraceId() {
@@ -38,10 +52,21 @@ public class OpLogMetaDataDO {
         this.traceId = traceId;
     }
 
-    public void setBizDesc(String bizDesc) {
-        this.bizDesc = bizDesc;
+    public String getOpType() {
+        return opType;
     }
 
+    public void setOpType(String opType) {
+        this.opType = opType;
+    }
+
+    public String getBizCode() {
+        return bizCode;
+    }
+
+    public void setBizCode(String bizCode) {
+        this.bizCode = bizCode;
+    }
 
     public Long getId() {
         return id;
@@ -91,10 +116,12 @@ public class OpLogMetaDataDO {
                 "id=" + id +
                 ", traceId='" + traceId + '\'' +
                 ", opId='" + opId + '\'' +
+                ", opType='" + opType + '\'' +
+                ", bizCode='" + bizCode + '\'' +
                 ", bizId='" + bizId + '\'' +
-                ", bizDesc='" + bizDesc + '\'' +
                 ", status=" + status +
                 ", metaData='" + metaData + '\'' +
+                ", createdTime=" + createdTime +
                 '}';
     }
 }

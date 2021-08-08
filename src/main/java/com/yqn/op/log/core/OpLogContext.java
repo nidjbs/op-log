@@ -10,9 +10,31 @@ import java.util.List;
 public class OpLogContext {
 
     private List<SqlMetaData> sqlMetaDataList;
-    private int curSqlCount = 0;
     private BizTrace bizTrace;
     private Long opLogId;
+    private SqlMetaData curSqlMetaData;
+    private boolean runAbleTag = true;
+
+    public void reset() {
+        this.curSqlMetaData = null;
+        this.runAbleTag = true;
+    }
+
+    public boolean isRunAbleTag() {
+        return runAbleTag;
+    }
+
+    public void setRunAbleTag(boolean runAbleTag) {
+        this.runAbleTag = runAbleTag;
+    }
+
+    public SqlMetaData getCurSqlMetaData() {
+        return curSqlMetaData;
+    }
+
+    public void setCurSqlMetaData(SqlMetaData curSqlMetaData) {
+        this.curSqlMetaData = curSqlMetaData;
+    }
 
     public Long getOpLogId() {
         return opLogId;
@@ -20,14 +42,6 @@ public class OpLogContext {
 
     public void setOpLogId(Long opLogId) {
         this.opLogId = opLogId;
-    }
-
-    public int getCurSqlCount() {
-        return curSqlCount;
-    }
-
-    public void setCurSqlCount(int curSqlCount) {
-        this.curSqlCount = curSqlCount;
     }
 
     public List<SqlMetaData> getSqlMetaDataList() {

@@ -4,7 +4,7 @@ import com.yqn.op.log.core.OpLogContent;
 import com.yqn.op.log.core.OpLogMetaDataDO;
 import com.yqn.op.log.core.OpLogMetaDataWrapper;
 import com.yqn.op.log.util.JsonUtil;
-import com.yqn.op.log.util.ObjBuilder;
+import com.yqn.op.log.common.ObjBuilder;
 
 /**
  * @author huayuanlin

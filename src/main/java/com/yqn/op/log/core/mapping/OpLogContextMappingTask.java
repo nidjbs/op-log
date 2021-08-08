@@ -2,7 +2,7 @@ package com.yqn.op.log.core.mapping;
 
 import com.yqn.op.log.common.OpLogConstant;
 import com.yqn.op.log.core.*;
-import com.yqn.op.log.util.ObjBuilder;
+import com.yqn.op.log.common.ObjBuilder;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
