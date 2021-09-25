@@ -7,8 +7,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @date 2021/08/07 22:09
  * @desc the class desc
  */
-@ConfigurationProperties(prefix = "op.log-global")
+@ConfigurationProperties(prefix = "op.log.global")
 public class OpLogGlobalConfig {
+
+    private Boolean enable = false;
 
     private String bizCode;
 
@@ -19,5 +21,13 @@ public class OpLogGlobalConfig {
 
     public void setBizCode(String bizCode) {
         this.bizCode = bizCode;
+    }
+
+    public Boolean getEnable() {
+        return enable;
+    }
+
+    public void setEnable(Boolean enable) {
+        this.enable = enable;
     }
 }

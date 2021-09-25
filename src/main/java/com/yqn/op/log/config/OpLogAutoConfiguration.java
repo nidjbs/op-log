@@ -1,18 +1,14 @@
 package com.yqn.op.log.config;
 
-import com.yqn.op.log.core.*;
-import com.yqn.op.log.core.mapping.IMappingLogDbService;
-import com.yqn.op.log.core.mapping.JdbcTemplateMappingLogDbServiceImpl;
-import com.yqn.op.log.core.mapping.OpLogMappingProcessCenter;
-import com.yqn.op.log.core.mapping.ProcessRawMappingBean;
-import com.yqn.op.log.core.web.FeignRequestInterceptor;
+import com.yqn.op.log.core.ISqlLogMetaDataService;
+import com.yqn.op.log.core.JdbcTemplateSqlLogMetaDataServiceImpl;
+import com.yqn.op.log.core.OpLogAopMethodInterceptor;
+import com.yqn.op.log.core.OpLogAopProxyCreator;
+import com.yqn.op.log.core.web.OpLogContextFilter;
 import com.yqn.op.log.util.SpringBeanUtil;
-import feign.Feign;
-import feign.RequestInterceptor;
-
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,12 +29,6 @@ public class OpLogAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessRawMappingBean processRawMappingBean() {
-        return new ProcessRawMappingBean();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     public SpringBeanUtil opLogSpringBeanUtil() {
         return new SpringBeanUtil();
     }
@@ -49,21 +39,16 @@ public class OpLogAutoConfiguration {
         return new JdbcTemplateSqlLogMetaDataServiceImpl();
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public IMappingLogDbService jdbcMappingLogService() {
-        return new JdbcTemplateMappingLogDbServiceImpl();
-    }
 
     @Bean
     @ConditionalOnMissingBean
-    public OpLogMappingProcessCenter opLogMappingProcessCenter() {
-        return new OpLogMappingProcessCenter();
-    }
-
-    @Bean
-    @ConditionalOnClass(Feign.class)
-    public RequestInterceptor feignRequestInterceptor() {
-        return new FeignRequestInterceptor();
+    public FilterRegistrationBean<OpLogContextFilter> opLogContextFilter() {
+        FilterRegistrationBean<OpLogContextFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new OpLogContextFilter());
+        registration.addUrlPatterns("/*");
+        registration.setName("op_log_context");
+        registration.setEnabled(true);
+        registration.setOrder(Integer.MIN_VALUE);
+        return registration;
     }
 }

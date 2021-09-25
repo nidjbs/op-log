@@ -11,28 +11,34 @@ public interface BizTraceSupport {
 
     /**
      * optional
+     *
      * @return traceId str
      */
-    String traceId();
+    default String traceId() {
+        return "";
+    }
 
     /**
      * optional
+     *
      * @return opId str
      */
-    String opId();
+    default String opId()  {return "";}
 
     /**
      * optional
+     *
      * @return bizId str
      */
-    String bizId();
+    default String bizId() {return "";}
 
     /**
      * optional
      * but, the OpLogGlobalConfig.bizCode higher priority
-     * @see OpLogGlobalConfig
+     *
      * @return bizCode str
+     * @see OpLogGlobalConfig
      */
-    String bizCode();
+    default String bizCode() {return "";}
 
 }

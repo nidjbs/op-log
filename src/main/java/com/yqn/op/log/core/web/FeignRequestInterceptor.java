@@ -3,12 +3,13 @@ package com.yqn.op.log.core.web;
 import com.yqn.op.log.common.OpLogConstant;
 import com.yqn.op.log.core.OpLogGlobalContext;
 import com.yqn.op.log.core.OpLogGlobalContextHolder;
-import com.yqn.op.log.util.BeanUtil;
+import com.yqn.op.log.exception.FrameworkException;
 import com.yqn.op.log.util.JsonUtil;
-import com.yqn.op.log.util.StringUtil;
-import com.yqn.op.log.util.WebUtil;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * @author huayuanlin
@@ -17,12 +18,17 @@ import feign.RequestTemplate;
  */
 public class FeignRequestInterceptor implements RequestInterceptor, RpcRequestInterceptor {
 
-
     @Override
     public void apply(RequestTemplate requestTemplate) {
         OpLogGlobalContext opLogGlobalContext = OpLogGlobalContextHolder.getContext();
         if (opLogGlobalContext != null) {
-            requestTemplate.header(OpLogConstant.CONTEXT_HANDLER_KEY, JsonUtil.toJsonString(opLogGlobalContext));
+            try {
+                String encode = URLEncoder.encode(JsonUtil.toJsonString(opLogGlobalContext), "UTF-8");
+                requestTemplate.header(OpLogConstant.CONTEXT_HANDLER_KEY, encode);
+            } catch (UnsupportedEncodingException e) {
+                // ignore
+                throw new FrameworkException("unsupportedEncodingException");
+            }
         }
     }
 }

@@ -19,6 +19,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.util.Assert;
 
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +47,8 @@ public class MappingBeansRegistrar implements ImportBeanDefinitionRegistrar, Res
         scanner.setResourceLoader(resourceLoader);
         scanner.addIncludeFilter(new AnnotationTypeFilter(OpLogTable.class));
         Map<String, Object> attrs = metadata.getAnnotationAttributes(EnableOpLogMapping.class.getName());
+        assert attrs != null;
+        Assert.notNull(attrs, "attrs is not null");
         String[] basePackages = (String[]) attrs.get("basePackages");
         Set<String> basePackageSet = Sets.newHashSet(basePackages);
         basePackageSet.forEach(path -> {

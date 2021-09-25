@@ -6,6 +6,7 @@ import com.yqn.op.log.util.JsonUtil;
 import com.yqn.op.log.common.ObjBuilder;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -20,7 +21,7 @@ public abstract class BaseSqlLogMetaDataService implements ISqlLogMetaDataServic
         OpLogContext opLogContext = OpLogContextProvider.opLogContext();
         OpLogGlobalContext bizTrace = opLogContext.getOpLogGlobalContext();
         List<OpLogContent> opLogContents = opLogContext.getSqlMetaDataList()
-                .stream().map(this::logContentConvert).collect(Collectors.toList());
+                .stream().filter(Objects::nonNull).map(this::logContentConvert).collect(Collectors.toList());
         return ObjBuilder.create(OpLogMetaDataDO::new)
                 .of(OpLogMetaDataDO::setBizId, bizTrace.getBizId())
                 .of(OpLogMetaDataDO::setOpId, bizTrace.getOpId())

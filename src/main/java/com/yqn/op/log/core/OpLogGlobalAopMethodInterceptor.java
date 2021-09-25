@@ -8,19 +8,25 @@ import com.yqn.op.log.util.AssertUtil;
 import com.yqn.op.log.util.SpringBeanUtil;
 import com.yqn.op.log.util.SpringUtil;
 import com.yqn.op.log.util.StringUtil;
-import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
+import java.lang.annotation.Annotation;
 
 /**
  * @author huayuanlin
  * @date 2021/08/07 22:03
  * @desc the class desc
  */
-public class OpLogGlobalAopMethodInterceptor implements MethodInterceptor {
+public class OpLogGlobalAopMethodInterceptor extends OpLogMethodInterceptor {
 
 
     @Override
-    public Object invoke(MethodInvocation invocation) throws Throwable {
+    protected Class<? extends Annotation> annotation() {
+        return OpLogGlobal.class ;
+    }
+
+    @Override
+    protected Object doIntercept(MethodInvocation invocation) throws Throwable {
         try {
             // try init global context
             initGlobalContext(invocation);
@@ -41,13 +47,18 @@ public class OpLogGlobalAopMethodInterceptor implements MethodInterceptor {
      * @param invocation method invocation
      */
     private void initGlobalContext(MethodInvocation invocation) {
-        BizTraceSupport bizTraceSupport = SpringBeanUtil.getBeanByType(BizTraceSupport.class);
-        String bizCode = bizTraceSupport.bizCode();
-        String bizId = bizTraceSupport.bizId();
-        String traceId = bizTraceSupport.traceId();
-        String opId = bizTraceSupport.opId();
+        String bizCode = null;
+        String bizId = null;
+        String traceId = null;
+        String opId = null;
+        BizTraceSupport bizTraceSupport = SpringBeanUtil.safeGetBeanByType(BizTraceSupport.class);
+        if (bizTraceSupport != null) {
+            bizCode = bizTraceSupport.bizCode();
+            bizId = bizTraceSupport.bizId();
+            traceId = bizTraceSupport.traceId();
+            opId = bizTraceSupport.opId();
+        }
         OpLogGlobalConfig logGlobalConfig = SpringBeanUtil.getBeanByType(OpLogGlobalConfig.class);
-        AssertUtil.notNull(logGlobalConfig, "logGlobalConfig bean");
         if (StringUtil.isNotEmpty(logGlobalConfig.getBizCode())) {
             bizCode = logGlobalConfig.getBizCode();
         }

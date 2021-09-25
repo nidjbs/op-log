@@ -21,11 +21,16 @@ import java.util.Properties;
  */
 @Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class}),
         @Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class})})
-public class MybatisOpLogInterceptor implements Interceptor {
+public class MybatisOpLogInterceptor implements Interceptor, OrmOpLogInterceptor {
 
 
     @Override
     public Object intercept(Invocation invocation) throws Exception {
+        boolean curOpenRecordOpLog = OpLogContextProvider.curOpenRecordOpLog();
+        // Currently not belonging to the environment where operation records need to be recorded
+        if (!curOpenRecordOpLog) {
+            return invocation.proceed();
+        }
         Object obj = PluginUtil.getTarget(invocation.getTarget());
         OpLogContext opLogContext = OpLogContextProvider.opLogContext();
         if (obj instanceof Executor) {

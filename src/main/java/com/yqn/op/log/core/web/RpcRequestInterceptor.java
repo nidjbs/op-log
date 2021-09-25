@@ -1,6 +1,5 @@
 package com.yqn.op.log.core.web;
 
-import com.yqn.op.log.core.OpLogGlobalContext;
 
 /**
  * @author huayuanlin

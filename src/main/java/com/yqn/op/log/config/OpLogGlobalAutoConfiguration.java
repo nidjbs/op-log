@@ -2,20 +2,10 @@ package com.yqn.op.log.config;
 
 import com.yqn.op.log.core.OpLogGlobalAopMethodInterceptor;
 import com.yqn.op.log.core.OpLogGlobalAopProxyCreator;
-import com.yqn.op.log.core.web.FeignRequestInterceptor;
-import com.yqn.op.log.core.web.OpLogContextFilter;
-import com.yqn.op.log.core.web.RpcRequestInterceptor;
-import feign.Feign;
-import feign.RequestInterceptor;
-
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import com.yqn.op.log.util.SpringBeanUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.embedded.tomcat.TomcatWebServer;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(OpLogGlobalConfig.class)
+@ConditionalOnProperty(prefix = "op.log.global", name = "enable", havingValue = "true")
 public class OpLogGlobalAutoConfiguration {
 
     @Bean
@@ -35,14 +26,8 @@ public class OpLogGlobalAutoConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean<OpLogContextFilter> opLogContextFilter() {
-        FilterRegistrationBean<OpLogContextFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new OpLogContextFilter());
-        registration.addUrlPatterns("/*");
-        registration.setName("op_log_context");
-        registration.setEnabled(true);
-        registration.setOrder(Integer.MIN_VALUE);
-        return registration;
+    @ConditionalOnMissingBean
+    public SpringBeanUtil opLogSpringBeanUtil() {
+        return new SpringBeanUtil();
     }
-
 }

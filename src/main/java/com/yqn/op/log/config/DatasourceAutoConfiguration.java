@@ -1,15 +1,14 @@
 package com.yqn.op.log.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -20,21 +19,23 @@ import javax.sql.DataSource;
  * @desc the class desc
  */
 @Configuration
+@ConditionalOnClass(DataSource.class)
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
+@ConditionalOnProperty(prefix = "op.log.datasource",name = "enable",havingValue = "true")
 public class DatasourceAutoConfiguration {
 
 
-//    @Bean
-//    public DefaultDatasourcePrimarySetterBean defaultDatasourcePrimarySetterBean() {
-//        return new DefaultDatasourcePrimarySetterBean();
-//    }
-
-    @Bean("opLogDatasourceProperties")
-    @ConfigurationProperties("op.log.datasource")
-    public DataSourceProperties opLogDatasourceProperties() {
-        return new DataSourceProperties();
+    @Bean
+    public DefaultDatasourcePrimarySetterBean defaultDatasourcePrimarySetterBean() {
+        return new DefaultDatasourcePrimarySetterBean();
     }
 
+
+    @Bean("opLogDatasourceProperties")
+    @ConfigurationProperties(prefix = "op.log.datasource")
+    public OpLogDataSourceProperties opLogDataSourceProperties () {
+        return new OpLogDataSourceProperties();
+    }
 
     @Bean("opLogJdbcTemplate")
     public JdbcTemplate opLogJdbcTemplate(@Qualifier("opLogDatasourceProperties") DataSourceProperties properties) {

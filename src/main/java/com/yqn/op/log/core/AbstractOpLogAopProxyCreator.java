@@ -51,7 +51,7 @@ public abstract class AbstractOpLogAopProxyCreator extends AbstractAutoProxyCrea
                 } else {
                     AdvisedSupport curProxyAdvisedSupportField = getCurProxyAdvisedSupportField(bean);
                     Advisor[] advisors = buildAdvisors(beanName, new Object[]{interceptor});
-                    Stream.of(advisors).forEach(advisor -> curProxyAdvisedSupportField.addAdvisor(0, advisor));
+                    Stream.of(advisors).forEach(curProxyAdvisedSupportField::addAdvisor);
                 }
                 ALREADY_PROXY_BEAN_SET.add(beanName);
             } catch (Exception e) {

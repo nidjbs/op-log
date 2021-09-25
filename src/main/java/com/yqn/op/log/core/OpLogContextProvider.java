@@ -19,4 +19,8 @@ public class OpLogContextProvider {
         return opLogContext;
     }
 
+    public static boolean curOpenRecordOpLog() {
+        return OpLogAopMethodInterceptor.CUR_OPEN_OP_LOG.get();
+    }
+
 }

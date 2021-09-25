@@ -10,7 +10,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 /**
  * @author huayuanlin
  * @date 2021/08/05 20:51
- * @desc the class desc
+ * @desc Set the Bean of the data Source of your default data source to Primary
  */
 public class DefaultDatasourcePrimarySetterBean implements BeanDefinitionRegistryPostProcessor {
 
